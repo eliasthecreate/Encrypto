@@ -1,80 +1,98 @@
-# Encrypto - Secure Communication & Privacy
+# Campus Connect ICU
 
-Encrypto is a modern Android application designed for users who prioritize privacy and data security. Built with industry-standard encryption algorithms and a robust cloud backend, it offers a secure environment for messaging and data protection.
+A Facebook-like campus social network for International Christian University students. Connect with classmates, share posts, chat in real-time, go live, and discover fellow students — all in one place.
 
 ## ✨ Features
 
-- **🛡️ Secure Chat Rooms**: Create or join password-protected chat rooms. 
-    - **End-to-End Encryption**: Messages are encrypted using the room password before being sent to the server.
-    - **Privacy First**: Even the server cannot read your messages without the specific room password.
-- **🔐 Advanced Crypto Tools**:
-    - **Encryption/Decryption**: Secure your sensitive text using **Argon2id** (for key derivation) and **AES-256-GCM** (for authenticated encryption).
-    - **Hashing**: Generate cryptographically secure hashes using **SHA-256**.
-- **👥 User Authentication**: Secure login and sign-up powered by **Firebase Authentication**.
-- **🛰️ Real-time Synchronization**: Instant message delivery and participant presence monitoring using **Firebase Firestore**.
-- **🎨 Modern UI/UX**: Professional, dark-themed interface with smooth transitions and intuitive navigation.
+- **📱 Campus Feed** — Share updates, events, and announcements with the ICU community. React, comment, and engage with posts.
+- **💬 Real-time Messaging** — Chat with friends with text, images, voice notes, and media. Read receipts, typing indicators, and online status.
+- **👥 Friends & Community** — Send friend requests, discover students from your department and year, and see mutual connections.
+- **📺 Live Streaming** — Broadcast and watch campus events, study sessions, performances, and sports. Go live with just a tap.
+- **🔔 Notifications** — Stay updated with friend requests, messages, likes, and live streams.
+- **👤 Profile** — Showcase your department, year, clubs, interests, and campus identity.
 
 ## 🛠️ Tech Stack
 
-- **Platform**: Android (Min SDK 23, Target SDK 35)
-- **Language**: Java
-- **Backend & Database**: Firebase (Auth, Firestore, Realtime Database)
-- **Security Library**: [Bouncy Castle](https://www.bouncycastle.org/) (Argon2id implementation)
-- **Architecture**: Activity-based with standardized `CryptoUtils` for security logic.
+| Layer | Technology |
+|---|---|
+| Framework | React 18 + TypeScript |
+| Build Tool | Vite 6 |
+| Backend & DB | Convex (real-time, serverless) |
+| Auth | Convex Auth |
+| Styling | Tailwind CSS 3 + shadcn/ui |
+| Animations | Framer Motion |
+| Icons | Lucide React |
+| Package Manager | Bun |
 
 ## 🚀 Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing.
-
 ### Prerequisites
 
-- **Android Studio** (Koala or newer recommended)
-- **JDK 17** or higher
-- A **Firebase Project** (Free tier/Spark plan is sufficient)
+- **Bun** (recommended) or **Node.js 18+**
+- A **Convex** account (free tier works perfectly)
 
-### Installation & Setup
+### Setup
 
-1. **Clone the repository**:
+1. **Install dependencies**
    ```bash
-   git clone https://github.com/your-username/Encrypto.git
-   cd Encrypto
+   bun install
    ```
 
-2. **Firebase Configuration**:
-   - Go to the [Firebase Console](https://console.firebase.google.com/).
-   - Add a new Android Project with package name `com.encrypto.app`.
-   - Download the `google-services.json` file.
-   - Place `google-services.json` inside the `app/` directory.
+2. **Set up Convex**
+   - Sign up at [convex.dev](https://convex.dev)
+   - Create a new project
+   - Copy your deployment URL
+   - Set it as `VITE_CONVEX_URL` in your environment/API keys
+   - Run `bun run convex:dev` to generate types and deploy the schema
 
-3. **Enable Firebase Services**:
-   - Enable **Email/Password** authentication in the Firebase Auth tab.
-   - Initialize **Cloud Firestore** in test mode (or setup rules for production).
-   - Create a Firestore collection named `rooms`.
+3. **Start the dev server**
+   ```bash
+   bun run dev
+   ```
 
-4. **Build the Project**:
-   - Open the project in Android Studio.
-   - Sync the project with Gradle files.
-   - Run the application on an emulator or a physical device.
+4. **Build for production**
+   ```bash
+   bun run build
+   ```
 
-## 🔒 Security Implementation Details
+## 📁 Project Structure
 
-Encrypto uses a high-security standard for data protection:
-- **Key Derivation**: We use **Argon2id** (v13) with 4 iterations, 64MB memory, and a 128-bit random salt. This makes brute-force attacks extremely difficult even on powerful hardware.
-- **Encryption**: Data is encrypted using **AES-256 in GCM (Galois/Counter Mode)**. This provides both confidentiality and authenticity, ensuring that encrypted data hasn't been tampered with.
-- **Hashing**: **SHA-256** is used for generating message digests and fingerprints.
+```
+src/
+├── components/
+│   ├── ui/              # shadcn/ui base components
+│   ├── AuthPage.tsx      # Login/Signup
+│   ├── Dashboard.tsx     # Main app shell + bottom nav
+│   ├── Feed.tsx          # Home feed with posts
+│   ├── Friends.tsx       # Friend requests + suggestions
+│   ├── LandingPage.tsx   # Public landing page
+│   ├── Live.tsx          # Live streaming
+│   ├── Messages.tsx      # Chat + conversations
+│   ├── Profile.tsx       # User profile
+│   └── RequireAuth.tsx   # Auth guard
+├── convex/
+│   ├── schema.ts         # Database schema
+│   ├── users.ts          # User queries/mutations
+│   ├── posts.ts          # Post queries/mutations
+│   ├── messages.ts       # Message queries/mutations
+│   ├── friends.ts        # Friend request queries/mutations
+│   ├── live.ts           # Live stream queries/mutations
+│   ├── notifications.ts  # Notification queries/mutations
+│   ├── stories.ts        # Story queries/mutations
+│   └── auth.config.ts    # Auth configuration
+├── lib/
+│   └── utils.ts          # Utility functions
+├── App.tsx               # Root with routes
+├── index.css             # Global styles + Tailwind
+└── main.tsx              # Entry point
+```
 
-## 📖 How to Use
+## 🔑 Environment Variables
 
-1. **Sign Up/Login**: Create an account to access the main features.
-2. **Crypto Tabs**:
-   - **Encrypt**: Enter text and a password. This generates a Base64 string containing the salt, nonce, and ciphertext.
-   - **Decrypt**: Paste the Base64 string and enter the correct password to retrieve the original message.
-   - **Hash**: Quickly generate SHA-256 hashes of any input.
-3. **Secure Chat**:
-   - Click "Join Chat" on the dashboard.
-   - Enter a Room Name, an Alias, and a Room Password.
-   - Only people with the exact Room Password can decrypt your messages in that room.
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_CONVEX_URL` | ✅ | Your Convex deployment URL |
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT
