@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
-          .single();
+          .maybeSingle();
 
         const p = profile as any;
         setUser({
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
-          .single();
+          .maybeSingle();
 
         const p2 = profileRaw as any;
         setUser({
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .from("profiles")
       .select("*")
       .eq("id", session.user.id)
-      .single();
+      .maybeSingle();
     const p = profileRaw as any;
     setUser({
       id: session.user.id,
@@ -117,6 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
     // Immediately set user from response so isAuthenticated is true right away
     await setUserFromSession(data?.session);
+
+    // Set user as online
+    if (data?.session?.user?.id) {
+      await (supabase.from("profiles") as any).update({ status: "online" }).eq("id", data.session.user.id);
+    }
   }, [setUserFromSession]);
 
   const signUp = useCallback(
@@ -135,12 +140,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Initialize crypto for the new user (key pair + shadow friends)
       if (data?.session?.user?.id) {
         initializeUserCrypto(data.session.user.id);
+        // Set status online for new sign ups
+        await (supabase.from("profiles") as any).update({ status: "online" }).eq("id", data.session.user.id);
       }
     },
     [setUserFromSession]
   );
 
   const signOut = useCallback(async () => {
+    // Set user as offline before signing out
+    const uid = await getCurrentUserId();
+    if (uid) {
+      await (supabase.from("profiles") as any).update({ status: "offline" }).eq("id", uid);
+    }
     await supabase.auth.signOut();
     setUser(null);
   }, []);

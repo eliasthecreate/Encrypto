@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bunx vite --host 0.0.0.0",
-    "build": "bunx vite build",
-    "preview": "bunx vite preview",
-    "ts:check": "bunx tsc -b --noEmit",
-    "convex:dev": "bunx convex dev --once"
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "ts:check": "tsc -b --noEmit",
+    "convex:dev": "npx convex dev --once"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",

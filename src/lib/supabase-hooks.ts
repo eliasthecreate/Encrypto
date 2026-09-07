@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "./supabase";
 import { useAuth } from "./auth-context";
 import { encryptMessage, decryptMessage } from "./crypto";
+import { toast } from "sonner";
 import type { Profile, Post, Message, FriendRequest, LiveStream, Notification, Conversation } from "./supabase-types";
 
 // ─── FEED HOOKS ─────────────────────────────────────────────────
@@ -95,6 +96,18 @@ export function useFeedPosts() {
       await supabase.from("post_likes").delete().eq("id", (existing.data as any).id);
     } else {
       await supabase.from("post_likes").insert({ post_id: postId, user_id: uid } as any);
+
+      // Send notification to post author
+      const postRes = await (supabase.from("posts") as any).select("user_id").eq("id", postId).single();
+      if (postRes.data && postRes.data.user_id !== uid) {
+        const myProfileRes = await (supabase.from("profiles") as any).select("name").eq("id", uid).single();
+        await (supabase.from("notifications") as any).insert({
+          user_id: postRes.data.user_id,
+          type: "like",
+          title: "New Like",
+          body: `${myProfileRes.data?.name ?? "Someone"} liked your post.`,
+        });
+      }
     }
     fetchPosts();
   };
@@ -102,18 +115,33 @@ export function useFeedPosts() {
   const addComment = async (postId: string, content: string) => {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData?.session?.user) return;
+    const uid = sessionData.session.user.id;
     await supabase.from("comments").insert({
       post_id: postId,
-      user_id: sessionData.session.user.id,
+      user_id: uid,
       content,
     } as any);
+
+    // Send notification to post author
+    const postRes = await (supabase.from("posts") as any).select("user_id").eq("id", postId).single();
+    if (postRes.data && postRes.data.user_id !== uid) {
+      const myProfileRes = await (supabase.from("profiles") as any).select("name").eq("id", uid).single();
+      await (supabase.from("notifications") as any).insert({
+        user_id: postRes.data.user_id,
+        type: "comment",
+        title: "New Comment",
+        body: `${myProfileRes.data?.name ?? "Someone"} commented on your post: "${content.slice(0, 50)}${content.length > 50 ? "..." : ""}"`,
+      });
+    }
+
     fetchPosts();
   };
 
   const createPost = async (
     content: string,
     type: "post" | "event" | "announcement" = "post",
-    location?: string
+    location?: string,
+    imageUrl?: string
   ) => {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData?.session?.user) return;
@@ -123,7 +151,31 @@ export function useFeedPosts() {
       type,
     };
     if (location) insertData.event_location = location;
+    if (imageUrl) insertData.image_url = imageUrl;
     await supabase.from("posts").insert(insertData);
+
+    // Send notification to all friends about the new post
+    if (sessionData.session.user.id) {
+      // Get user's friends to notify them
+      const { data: friends } = await supabase
+        .from("friends")
+        .select("*")
+        .or(`user_id_1.eq.${sessionData.session.user.id},user_id_2.eq.${sessionData.session.user.id}`);
+
+      const myProfileRes2 = await (supabase.from("profiles") as any).select("name").eq("id", sessionData.session.user.id).single();
+      const myProfile = myProfileRes2.data;
+
+      for (const f of (friends ?? [])) {
+        const friendId = (f as any).user_id_1 === sessionData.session.user.id ? (f as any).user_id_2 : (f as any).user_id_1;
+        await (supabase.from("notifications") as any).insert({
+          user_id: friendId,
+          type: "new_post",
+          title: "New Post",
+          body: `${myProfile?.name ?? "Someone"} just shared a new ${type}!`,
+        });
+      }
+    }
+
     fetchPosts();
   };
 
@@ -133,8 +185,16 @@ export function useFeedPosts() {
 // ─── MESSAGES HOOKS ─────────────────────────────────────────────
 
 export interface ConversationWithDetails {
-  conversation: { id: string; created_at?: string };
+  conversation: {
+    id: string;
+    created_at?: string;
+    is_group?: boolean;
+    group_name?: string | null;
+    group_avatar_url?: string | null;
+  };
   otherUser: { id: string; name: string; avatar_url: string | null; status: string };
+  isGroup: boolean;
+  members: { id: string; name: string; avatar_url: string | null }[];
   lastMessage: Message | null;
   unreadCount: number;
 }
@@ -142,20 +202,15 @@ export interface ConversationWithDetails {
 export function useConversations() {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+  const { user } = useAuth();
+  const userId = user?.id;
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUserId(data.session?.user?.id ?? null);
-    });
-  }, []);
-
-  useEffect(() => {
+  const fetchConvos = useCallback(async () => {
     if (!userId) return;
+    setLoading(true);
 
-    const fetchConvos = async () => {
-      setLoading(true);
-
+    try {
       const { data: parts } = await supabase
         .from("conversation_participants")
         .select("conversation_id")
@@ -170,28 +225,58 @@ export function useConversations() {
 
       const convIds: string[] = participations.map((p: any) => p.conversation_id);
 
+      // Exclude conversations this user has soft-deleted (delete chat — data stays in DB)
+      const { data: hiddenConvs } = await supabase
+        .from("conversations")
+        .select("id")
+        .contains("hidden_for", [userId]);
+      const hiddenIds = new Set((hiddenConvs ?? []).map((c: any) => c.id));
+      const visibleConvIds = convIds.filter((id) => !hiddenIds.has(id));
+
       const { data: allPartsRaw } = await supabase
         .from("conversation_participants")
         .select("conversation_id, user_id")
-        .in("conversation_id", convIds);
-
+        .in("conversation_id", visibleConvIds);
       const allParts: any[] = allPartsRaw ?? [];
-      const result: ConversationWithDetails[] = [];
 
-      for (const convId of convIds) {
-        const otherPart = allParts.find((p: any) => p.conversation_id === convId && p.user_id !== userId);
-        if (!otherPart) continue;
+      // Group metadata + member profiles (batched, avoids N+1)
+      const { data: convMetaRaw } = await supabase
+        .from("conversations")
+        .select("id, is_group, group_name, group_avatar_url")
+        .in("id", visibleConvIds);
+      const convMeta: Record<string, any> = {};
+      for (const c of (convMetaRaw ?? [])) convMeta[(c as any).id] = c;
 
-        const { data: otherProfile } = await supabase
+      const memberIds = Array.from(new Set(allParts.map((p: any) => p.user_id)));
+      const memberProfiles: Record<string, any> = {};
+      if (memberIds.length > 0) {
+        const { data: profilesRaw } = await supabase
           .from("profiles")
           .select("id, name, avatar_url, status")
-          .eq("id", otherPart.user_id)
-          .single();
+          .in("id", memberIds);
+        for (const p of (profilesRaw ?? [])) memberProfiles[(p as any).id] = p;
+      }
+
+      const result: ConversationWithDetails[] = [];
+
+      for (const convId of visibleConvIds) {
+        const meta: any = convMeta[convId] ?? {};
+        const convParts = allParts.filter((p: any) => p.conversation_id === convId);
+        const isGroup = !!meta.is_group;
+        const members = convParts
+          .map((p: any) => memberProfiles[p.user_id])
+          .filter(Boolean)
+          .map((p: any) => ({ id: p.id, name: p.name, avatar_url: p.avatar_url }));
+
+        const otherPart = convParts.find((p: any) => p.user_id !== userId);
+        if (!isGroup && !otherPart) continue;
+        const otherProfile = otherPart ? memberProfiles[otherPart.user_id] : null;
 
         const { data: msgs } = await supabase
           .from("messages")
           .select("*")
           .eq("conversation_id", convId)
+          .not("deleted_for", "cs", `{${userId}}`)
           .order("created_at", { ascending: false })
           .limit(1);
 
@@ -202,38 +287,86 @@ export function useConversations() {
           .select("*", { count: "exact", head: true })
           .eq("conversation_id", convId)
           .eq("read", false)
-          .neq("sender_id", userId);
+          .neq("sender_id", userId)
+          .not("deleted_for", "cs", `{${userId}}`);
 
         result.push({
-          conversation: { id: convId },
-          otherUser: (otherProfile ?? { id: "", name: "Unknown", avatar_url: null, status: "offline" }) as any,
+          conversation: {
+            id: convId,
+            is_group: isGroup,
+            group_name: meta.group_name ?? null,
+            group_avatar_url: meta.group_avatar_url ?? null,
+          },
+          otherUser: isGroup
+            ? { id: convId, name: meta.group_name || "Group Chat", avatar_url: meta.group_avatar_url ?? null, status: "offline" }
+            : (otherProfile ?? { id: "", name: "Unknown", avatar_url: null, status: "offline" }) as any,
+          isGroup,
+          members: isGroup ? members : [],
           lastMessage: msgList[0] ?? null,
           unreadCount: unread ?? 0,
         });
       }
 
-      setConversations(result);
-      setLoading(false);
-    };
+      // Dedupe: one designated tab per friend. If duplicate conversations exist
+      // (created before the dedupe fix), keep only the one with the most recent
+      // message — and prefer one with unread messages on a tie.
+      const byFriend = new Map<string, ConversationWithDetails>();
+      for (const c of result) {
+        const existing = byFriend.get(c.otherUser.id);
+        if (!existing) {
+          byFriend.set(c.otherUser.id, c);
+          continue;
+        }
+        const aTime = existing.lastMessage?.created_at ?? "";
+        const bTime = c.lastMessage?.created_at ?? "";
+        if (bTime > aTime || (bTime === aTime && c.unreadCount > existing.unreadCount)) {
+          byFriend.set(c.otherUser.id, c);
+        }
+      }
 
-    fetchConvos();
+      // Sort by most recent activity — chats with the newest message at the top
+      const sorted = Array.from(byFriend.values()).sort((a, b) => {
+        const aTime = a.lastMessage?.created_at ?? a.conversation.created_at ?? "";
+        const bTime = b.lastMessage?.created_at ?? b.conversation.created_at ?? "";
+        return new Date(bTime).getTime() - new Date(aTime).getTime();
+      });
+
+      setConversations(sorted);
+    } catch (err) {
+      console.error("Failed to fetch conversations:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
 
-  return { conversations, loading };
+  useEffect(() => {
+    fetchConvos();
+  }, [fetchConvos, refreshCounter]);
+
+  const refresh = useCallback(() => {
+    setRefreshCounter((c) => c + 1);
+  }, []);
+
+  return { conversations, loading, refresh };
 }
 
 export function useMessages(conversationId: string | null, otherUserId?: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [decrypted, setDecrypted] = useState<Record<string, string>>({});
+  const [pollVotes, setPollVotes] = useState<Record<string, { votes: Record<string, number>; myVote: string | null }>>({});
   const [loading, setLoading] = useState(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
   const { user } = useAuth();
+  const decryptedRef = useRef<Record<string, string>>({});
 
-  // Decrypt messages when they come in
+  // Decrypt messages when they come in (cached — only new messages are decrypted)
   useEffect(() => {
     const run = async () => {
       if (!conversationId || !otherUserId) return;
-      const map: Record<string, string> = {};
+      const map = { ...decryptedRef.current };
+      let changed = false;
       for (const msg of messages) {
+        if (map[msg.id]) continue;
         const senderId = msg.sender_id;
         const decryptedId = senderId === user?.id ? otherUserId : senderId;
         if (decryptedId) {
@@ -241,71 +374,214 @@ export function useMessages(conversationId: string | null, otherUserId?: string 
         } else {
           map[msg.id] = msg.content;
         }
+        changed = true;
       }
-      setDecrypted(map);
+      if (changed) {
+        decryptedRef.current = map;
+        setDecrypted(map);
+      }
     };
     run();
   }, [messages, conversationId, otherUserId, user?.id]);
 
+  // Fetch votes for poll messages (results + my vote)
+  const fetchPollVotes = useCallback(async (msgs: Message[]) => {
+    if (!user?.id) return;
+    const pollIds = msgs.filter((m) => m.type === "poll").map((m) => m.id);
+    if (!pollIds.length) {
+      setPollVotes({});
+      return;
+    }
+    const { data } = await (supabase.from("poll_votes") as any)
+      .select("poll_message_id, user_id, option")
+      .in("poll_message_id", pollIds);
+    const rows: any[] = data ?? [];
+    const agg: Record<string, { votes: Record<string, number>; myVote: string | null }> = {};
+    for (const id of pollIds) agg[id] = { votes: {}, myVote: null };
+    for (const r of rows) {
+      const a = agg[r.poll_message_id];
+      if (!a) continue;
+      a.votes[r.option] = (a.votes[r.option] ?? 0) + 1;
+      if (r.user_id === user.id) a.myVote = r.option;
+    }
+    setPollVotes(agg);
+  }, [user?.id]);
+
+  // Fetch messages silently (no loading state = no flicker); skips cleared messages
+  const fetchMessages = useCallback(async () => {
+    if (!conversationId || !user?.id) return;
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", conversationId)
+      .not("deleted_for", "cs", `{${user.id}}`)
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.error("useMessages: fetch failed", error);
+      return;
+    }
+    const msgs = (data ?? []) as Message[];
+    setMessages(msgs);
+    fetchPollVotes(msgs);
+  }, [conversationId, user?.id, fetchPollVotes]);
+
   useEffect(() => {
     if (!conversationId) return;
 
-    const fetchMsgs = async () => {
+    const load = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
-
-      setMessages((data ?? []) as Message[]);
+      await fetchMessages();
       setLoading(false);
     };
+    load();
 
-    fetchMsgs();
-
+    // Realtime subscription (works when the messages table is in the supabase_realtime publication)
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          const incoming = payload.new as Message;
+          setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
+        () => {
+          // Delivery/read ticks changed — silently refresh so ticks update live
+          fetchMessages();
         }
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [conversationId]);
+    // Polling fallback every 3s — guarantees the receiver sees new messages even if
+    // Realtime is not enabled on the messages table in Supabase.
+    const interval = setInterval(fetchMessages, 3000);
 
-  const sendMessage = async (content: string, type: "text" | "image" | "voice" = "text") => {
-    if (!conversationId) return;
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData?.session?.user) return;
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, [conversationId, refreshCounter, fetchMessages]);
 
-    let contentToSend = content;
-    if (otherUserId) {
-      contentToSend = await encryptMessage(conversationId, otherUserId, content);
+  const sendMessage = async (
+    content: string,
+    type: "text" | "image" | "voice" | "file" | "poll" | "call" = "text",
+    options?: {
+      fileUrl?: string;
+      fileName?: string;
+      fileSize?: number;
+      metadata?: Record<string, any>;
     }
+  ) => {
+    try {
+      if (!conversationId) return;
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) return;
 
-    await supabase.from("messages").insert({
-      conversation_id: conversationId,
-      sender_id: sessionData.session.user.id,
-      content: contentToSend,
-      type,
-    } as any);
+      const insertData: any = {
+        conversation_id: conversationId,
+        sender_id: sessionData.session.user.id,
+        content: content,
+        type,
+      };
+
+      if (options?.fileUrl) insertData.file_url = options.fileUrl;
+      if (options?.fileName) insertData.file_name = options.fileName;
+      if (options?.fileSize) insertData.file_size = options.fileSize;
+      if (options?.metadata) insertData.metadata = options.metadata;
+
+      const { error } = await supabase.from("messages").insert(insertData);
+      if (error) {
+        console.error("sendMessage: insert failed", error);
+        toast.error("Send failed: " + error.message);
+        return;
+      }
+
+      // Silently re-fetch so the sender sees the message instantly
+      await fetchMessages();
+    } catch (err: any) {
+      console.error("sendMessage: unexpected error", err);
+      toast.error("Send error: " + (err?.message || "Unknown"));
+    }
   };
+
+  const refreshMessages = useCallback(() => {
+    setRefreshCounter((c) => c + 1);
+  }, []);
 
   const getDecryptedContent = (msgId: string): string => {
     return decrypted[msgId] ?? messages.find((m) => m.id === msgId)?.content ?? "";
   };
 
-  return { messages, decrypted, getDecryptedContent, loading, sendMessage };
+  // Cast a vote on a poll (upsert — changes an existing vote, creator can vote too)
+  const voteOnPoll = async (pollMessageId: string, option: string) => {
+    if (!user?.id) return;
+    const { error } = await (supabase.from("poll_votes") as any).upsert(
+      { poll_message_id: pollMessageId, user_id: user.id, option },
+      { onConflict: "poll_message_id,user_id" }
+    );
+    if (error) {
+      console.error("voteOnPoll failed:", error);
+      toast.error("Vote failed: " + error.message);
+      return;
+    }
+    await fetchMessages(); // refresh votes + messages
+  };
+
+  return {
+    messages,
+    decrypted,
+    getDecryptedContent,
+    loading,
+    sendMessage,
+    refreshMessages,
+    pollVotes,
+    voteOnPoll,
+  };
+}
+
+// ─── DELIVERY STATUS ───────────────────────────────────────────
+// Marks incoming messages as "delivered" while this user has the app open.
+// (Sender sees 1 grey tick → 2 grey ticks the moment the recipient is online.)
+export function useMarkIncomingDelivered() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const markDelivered = async () => {
+      try {
+        const { data: parts } = await supabase
+          .from("conversation_participants")
+          .select("conversation_id")
+          .eq("user_id", user.id);
+        const convIds: string[] = (parts ?? []).map((p: any) => p.conversation_id);
+        if (!convIds.length) return;
+        const { error } = await (supabase.from("messages") as any)
+          .update({ delivered: true })
+          .in("conversation_id", convIds)
+          .neq("sender_id", user.id)
+          .eq("delivered", false);
+        if (error) console.error("markDelivered failed:", error.message);
+      } catch (err) {
+        console.error("markDelivered error:", err);
+      }
+    };
+
+    markDelivered();
+    const interval = setInterval(markDelivered, 10000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 }
 
 // ─── FRIENDS HOOKS ──────────────────────────────────────────────
 
-export function useFriendRequests() {
+// `channelTag` isolates the realtime channel per caller, so the Dashboard bell's
+// subscription is never torn down when the Friends tab mounts/unmounts its own.
+export function useFriendRequests(channelTag = "main") {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -318,24 +594,113 @@ export function useFriendRequests() {
 
   useEffect(() => {
     if (!userId) return;
+    let active = true;
 
     const fetchRequests = async () => {
-      const { data } = await supabase
-        .from("friend_requests")
-        .select(`*, sender:profiles!sender_id(id, name, department, year, status)`)
-        .eq("receiver_id", userId)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false });
-
-      setRequests(data ?? []);
-      setLoading(false);
+      try {
+        const { data } = await supabase
+          .from("friend_requests")
+          .select(`*, sender:profiles!sender_id(id, name, department, year, status)`)
+          .eq("receiver_id", userId)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false });
+        if (!active) return;
+        setRequests(data ?? []);
+      } catch (err) {
+        console.error("useFriendRequests fetch failed:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
     };
 
     fetchRequests();
-  }, [userId]);
+
+    // Live updates: refetch whenever a request arrives or is accepted/rejected
+    const channel = supabase
+      .channel(`friend-requests-${channelTag}-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "friend_requests",
+          filter: `receiver_id=eq.${userId}`,
+        },
+        () => {
+          fetchRequests();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [userId, channelTag]);
 
   const acceptRequest = async (requestId: string) => {
+    // Get the request details first
+    const reqRes = await (supabase.from("friend_requests") as any).select("*").eq("id", requestId).single();
+    if (!reqRes.data) return;
+    const req = reqRes.data;
+
+    // Update status to accepted (auto-creates friend record via DB trigger)
     await (supabase.from("friend_requests") as any).update({ status: "accepted" }).eq("id", requestId);
+
+    // Auto-create a conversation between the two users
+    if (userId && req.sender_id) {
+      // Check if conversation already exists
+      const { data: existingParts } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", userId);
+
+      const existingConvIds = existingParts?.map((p: any) => p.conversation_id) ?? [];
+
+      if (existingConvIds.length > 0) {
+        // Check if any existing conversation has the other user
+        const { data: otherParts } = await supabase
+          .from("conversation_participants")
+          .select("conversation_id")
+          .eq("user_id", req.sender_id)
+          .in("conversation_id", existingConvIds);
+
+        if (otherParts && otherParts.length > 0) {
+          // Conversation already exists, skip creation
+          setRequests((prev: any[]) => prev.filter((r: any) => r.id !== requestId));
+          return;
+        }
+      }
+
+      // Create new conversation — generate the ID client-side and insert WITHOUT .select(),
+      // because RLS blocks selecting a conversation you're not a participant of yet.
+      const convId = crypto.randomUUID();
+      const { error: convError } = await (supabase
+        .from("conversations") as any)
+        .insert({ id: convId });
+      if (convError) {
+        console.error("acceptRequest: conversation create failed", convError);
+        return;
+      }
+
+      const { error: partError } = await supabase.from("conversation_participants").insert([
+        { conversation_id: convId, user_id: userId },
+        { conversation_id: convId, user_id: req.sender_id },
+      ] as any);
+      if (partError) {
+        console.error("acceptRequest: participants insert failed", partError);
+      }
+    }
+
+    // Send notification to the sender
+    const myProfileRes = await (supabase.from("profiles") as any).select("name").eq("id", userId).single();
+    await (supabase.from("notifications") as any).insert({
+      user_id: (req as any).sender_id,
+      type: "friend_request",
+      title: "Friend Request Accepted",
+      body: `${myProfileRes.data?.name ?? "Someone"} accepted your friend request!`,
+    });
+
     setRequests((prev: any[]) => prev.filter((r: any) => r.id !== requestId));
   };
 
@@ -347,6 +712,15 @@ export function useFriendRequests() {
   const sendRequest = async (receiverId: string) => {
     if (!userId) return;
     await supabase.from("friend_requests").insert({ sender_id: userId, receiver_id: receiverId } as any);
+
+    // Send notification to receiver
+    const myProfileRes = await (supabase.from("profiles") as any).select("name").eq("id", userId).single();
+    await (supabase.from("notifications") as any).insert({
+      user_id: receiverId,
+      type: "friend_request",
+      title: "New Friend Request",
+      body: `${myProfileRes.data?.name ?? "Someone"} sent you a friend request.`,
+    });
   };
 
   return { requests, loading, acceptRequest, rejectRequest, sendRequest };

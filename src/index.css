@@ -120,9 +120,116 @@
   }
 }
 
-/* ===== Smooth theme transition ===== */
-*,
-*::before,
-*::after {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+/* ===== Wallpaper variants ===== */
+.wallpaper-warm-blur {
+  --wallpaper-bg: linear-gradient(135deg, #fef3c7, #ffffff, #f3e8ff);
+  --wallpaper-contrast-text: #1f2937;
+  --wallpaper-contrast-glass: rgba(255,255,255,0.85);
+  --wallpaper-contrast-border: rgba(0,0,0,0.08);
 }
+.wallpaper-purple-haze {
+  --wallpaper-bg: linear-gradient(135deg, #f3e8ff, #ffffff, #fce7f3);
+  --wallpaper-contrast-text: #1f2937;
+  --wallpaper-contrast-glass: rgba(255,255,255,0.85);
+  --wallpaper-contrast-border: rgba(0,0,0,0.08);
+}
+.wallpaper-ocean-breeze {
+  --wallpaper-bg: linear-gradient(135deg, #e0f2fe, #ffffff, #ccfbf1);
+  --wallpaper-contrast-text: #1f2937;
+  --wallpaper-contrast-glass: rgba(255,255,255,0.85);
+  --wallpaper-contrast-border: rgba(0,0,0,0.08);
+}
+.wallpaper-midnight {
+  --wallpaper-bg: linear-gradient(135deg, #030712, #1e1b4b, #111827);
+  --wallpaper-contrast-text: #f1f5f9;
+  --wallpaper-contrast-glass: rgba(15,23,42,0.85);
+  --wallpaper-contrast-border: rgba(255,255,255,0.08);
+}
+.wallpaper-forest {
+  --wallpaper-bg: linear-gradient(135deg, #d1fae5, #ffffff, #ecfccb);
+  --wallpaper-contrast-text: #1f2937;
+  --wallpaper-contrast-glass: rgba(255,255,255,0.85);
+  --wallpaper-contrast-border: rgba(0,0,0,0.08);
+}
+
+/* Apply wallpaper backgrounds */
+.wallpaper-warm-blur .bg-warm,
+.wallpaper-purple-haze .bg-warm,
+.wallpaper-ocean-breeze .bg-warm,
+.wallpaper-forest .bg-warm {
+  background-image: var(--wallpaper-bg) !important;
+}
+.wallpaper-midnight .bg-warm {
+  background-image: var(--wallpaper-bg) !important;
+}
+
+/* ===== Wallpaper text contrast fixes ===== */
+/* Ensure all body text has text-shadow for readability against any background */
+body {
+  text-shadow: 0 0 0 var(--wallpaper-contrast-text, inherit);
+}
+
+/* Glass cards need to be more opaque on wallpaper backgrounds */
+.wallpaper-warm-blur .glass-card,
+.wallpaper-purple-haze .glass-card,
+.wallpaper-ocean-breeze .glass-card,
+.wallpaper-forest .glass-card {
+  background-color: var(--wallpaper-contrast-glass) !important;
+  border-color: var(--wallpaper-contrast-border) !important;
+  backdrop-filter: blur(16px);
+}
+
+.wallpaper-midnight .glass-card {
+  background-color: var(--wallpaper-contrast-glass) !important;
+  border-color: var(--wallpaper-contrast-border) !important;
+  backdrop-filter: blur(16px);
+}
+
+/* Badge/header contrast on wallpapers */
+.wallpaper-warm-blur .bg-white,
+.wallpaper-purple-haze .bg-white,
+.wallpaper-ocean-breeze .bg-white,
+.wallpaper-forest .bg-white {
+  @apply bg-white/90;
+}
+
+.wallpaper-midnight .bg-white\/80 {
+  background-color: rgba(3,7,18,0.85) !important;
+}
+
+/* Light text on dark wallpapers should be readable */
+.wallpaper-midnight {
+  --foreground: 210 40% 98% !important;
+}
+
+/* Muted text needs extra contrast on wallpapers */
+.wallpaper-warm-blur .text-muted-foreground,
+.wallpaper-purple-haze .text-muted-foreground,
+.wallpaper-ocean-breeze .text-muted-foreground,
+.wallpaper-forest .text-muted-foreground {
+  text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+.wallpaper-midnight .text-muted-foreground {
+  @apply text-gray-400;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Input/search fields need clear backgrounds on wallpapers */
+.wallpaper-warm-blur input,
+.wallpaper-purple-haze input,
+.wallpaper-ocean-breeze input,
+.wallpaper-forest input,
+.wallpaper-warm-blur textarea,
+.wallpaper-purple-haze textarea,
+.wallpaper-ocean-breeze textarea,
+.wallpaper-forest textarea {
+  @apply bg-white/95 dark:bg-gray-800/95;
+}
+
+.wallpaper-midnight input,
+.wallpaper-midnight textarea {
+  @apply bg-gray-800/95;
+}
+
+

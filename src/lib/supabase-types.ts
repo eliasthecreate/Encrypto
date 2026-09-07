@@ -75,9 +75,20 @@ export interface Profile {
   email: string;
   department: string | null;
   year: string | null;
+  skills: string | null;
   avatar_url: string | null;
   cover_url: string | null;
   bio: string | null;
+  pronouns: string | null;
+  location: string | null;
+  hometown: string | null;
+  birthday: string | null;
+  workplace: string | null;
+  job_title: string | null;
+  school: string | null;
+  website: string | null;
+  instagram: string | null;
+  twitter: string | null;
   status: "online" | "offline" | "away" | "busy";
   created_at: string;
 }
@@ -113,6 +124,13 @@ export interface Comment {
 export interface Conversation {
   id: string;
   created_at: string;
+  /** User IDs for whom this conversation is hidden (soft-deleted). */
+  hidden_for: string[];
+  /** Group chat fields */
+  is_group: boolean;
+  group_name: string | null;
+  group_avatar_url: string | null;
+  created_by: string | null;
 }
 
 export interface ConversationParticipant {
@@ -126,8 +144,17 @@ export interface Message {
   conversation_id: string;
   sender_id: string;
   content: string;
-  type: "text" | "image" | "voice";
+  type: "text" | "image" | "voice" | "file" | "poll" | "call";
+  metadata: Record<string, any> | null;
+  file_url: string | null;
+  file_name: string | null;
+  file_size: number | null;
+  /** False = sent but recipient hasn't received it (they're offline). */
+  delivered: boolean;
+  /** True = recipient opened the chat. Blue double-tick. */
   read: boolean;
+  /** User IDs for whom this message is hidden (cleared chat). Data stays in DB. */
+  deleted_for: string[];
   created_at: string;
 }
 

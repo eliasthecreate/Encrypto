@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Image as ImageIcon,
@@ -13,6 +13,7 @@ import {
   Loader2,
   X,
   Crosshair,
+  Upload,
 } from "lucide-react";
 import { useFeedPosts, useStories } from "@/lib/supabase-hooks";
 import { Avatar } from "./ui/avatar";
@@ -23,16 +24,23 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { formatTimeAgo } from "@/lib/utils";
 import { getCurrentPosition, reverseGeocode } from "@/lib/geolocation";
+import { uploadFile } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 
 export function Feed() {
   const [postContent, setPostContent] = useState("");
+  const [postType, setPostType] = useState<"post" | "event" | "announcement">("post");
+  const [postImage, setPostImage] = useState<File | null>(null);
+  const [postImagePreview, setPostImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [eventDate, setEventDate] = useState("");
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [showCommentInput, setShowCommentInput] = useState<Record<string, boolean>>({});
   const [shareLocation, setShareLocation] = useState(false);
   const [locationName, setLocationName] = useState<string | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { posts, loading, likePost, addComment, createPost } = useFeedPosts();
   const { stories, createStory } = useStories();
   const { user } = useAuth();
@@ -64,11 +72,49 @@ export function Feed() {
 
   const handlePost = async () => {
     if (!postContent.trim()) return;
-    await createPost(postContent, "post", shareLocation ? locationName ?? undefined : undefined);
-    toast.success("Post shared with campus!");
+
+    setUploading(true);
+    let imageUrl: string | undefined;
+
+    // Upload image if selected
+    if (postImage) {
+      const url = await uploadFile("post-images", `${Date.now()}-${postImage.name}`, postImage);
+      if (url) imageUrl = url;
+    }
+
+    await createPost(
+      postContent,
+      postType,
+      shareLocation ? locationName ?? undefined : undefined,
+      imageUrl
+    );
+
+    toast.success(postType === "event" ? "Event created! 🎉" : "Post shared with campus!");
     setPostContent("");
+    setPostImage(null);
+    setPostImagePreview(null);
+    setPostType("post");
+    setEventDate("");
     setShareLocation(false);
     setLocationName(null);
+    setUploading(false);
+  };
+
+  const handleSelectImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPostImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPostImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleEventClick = () => {
+    setPostType(postType === "event" ? "post" : "event");
   };
 
   const handleCreateStory = async () => {
@@ -150,19 +196,57 @@ export function Feed() {
                 </div>
               )}
 
+              {postImagePreview && (
+                <div className="mt-2 relative">
+                  <img src={postImagePreview} alt="Preview" className="w-full h-40 object-cover rounded-xl" />
+                  <button
+                    onClick={() => { setPostImage(null); setPostImagePreview(null); }}
+                    className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+
+              {postType === "event" && (
+                <div className="mt-2 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-orange-500" />
+                  <input
+                    type="datetime-local"
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className="flex-1 h-9 px-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs dark:text-gray-200 dark:[color-scheme:dark] focus:outline-none"
+                  />
+                </div>
+              )}
+
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <div className="flex gap-1">
-                  <button className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-purple-500 transition-all flex items-center gap-1.5 text-xs font-medium">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  <button onClick={handleSelectImage} className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-purple-500 transition-all flex items-center gap-1.5 text-xs font-medium">
                     <ImageIcon className="h-4 w-4" />
-                    Photo
+                    {postImage ? "Change" : "Photo"}
                   </button>
-                  <button className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-pink-500 transition-all flex items-center gap-1.5 text-xs font-medium">
+                  <button onClick={handleSelectImage} className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-pink-500 transition-all flex items-center gap-1.5 text-xs font-medium">
                     <Video className="h-4 w-4" />
                     Video
                   </button>
-                  <button className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-orange-500 transition-all flex items-center gap-1.5 text-xs font-medium">
+                  <button
+                    onClick={handleEventClick}
+                    className={`h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-1.5 text-xs font-medium ${
+                      postType === "event"
+                        ? "bg-orange-50 dark:bg-orange-900/30 text-orange-500"
+                        : "text-gray-500 dark:text-gray-400 hover:text-orange-500"
+                    }`}
+                  >
                     <Calendar className="h-4 w-4" />
-                    Event
+                    {postType === "event" ? "Event" : "Event"}
                   </button>
                   <button
                     onClick={handleToggleLocation}
@@ -185,11 +269,15 @@ export function Feed() {
                   size="sm"
                   variant="gradient"
                   onClick={handlePost}
-                  disabled={!postContent.trim()}
+                  disabled={!postContent.trim() || uploading}
                   className="h-8"
                 >
-                  <Send className="h-3.5 w-3.5 mr-1.5" />
-                  Post
+                  {uploading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                  )}
+                  {postType === "event" ? "Create Event" : "Post"}
                 </Button>
               </div>
             </div>

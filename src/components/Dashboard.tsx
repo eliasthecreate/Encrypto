@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth-context";
-import { useNotifications } from "@/lib/supabase-hooks";
+import { useNotifications, useConversations, useMarkIncomingDelivered, useFriendRequests } from "@/lib/supabase-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -13,7 +13,10 @@ import {
   Search,
   LogOut,
   GraduationCap,
+  UserPlus,
+  ChevronRight,
 } from "lucide-react";
+import { Avatar } from "./ui/avatar";
 import { Feed } from "./Feed";
 import { Messages } from "./Messages";
 import { Friends } from "./Friends";
@@ -33,10 +36,29 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState("feed");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [inChat, setInChat] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { notifications, unreadCount, markAllAsRead, markAsRead } =
     useNotifications();
+  const { requests: friendRequests } = useFriendRequests("bell");
+  const { conversations } = useConversations();
+
+  // Pending connect requests are shown at the top of the bell dropdown
+  const regularNotifications = notifications.filter(
+    (n: any) => n.type !== "friend_request"
+  );
+  const unreadRegular = regularNotifications.filter((n: any) => !n.read).length;
+  const bellBadgeCount = unreadRegular + friendRequests.length;
+
+  // Marks incoming messages as "delivered" while the app is open (2 grey ticks on sender side)
+  useMarkIncomingDelivered();
+
+  // Total unread messages from all conversations
+  const totalUnreadMessages = conversations.reduce(
+    (sum, c) => sum + c.unreadCount,
+    0
+  );
 
   const handleSignOut = () => {
     signOut();
@@ -49,7 +71,7 @@ export function Dashboard() {
       case "feed":
         return <Feed />;
       case "messages":
-        return <Messages />;
+        return <Messages onChatOpen={setInChat} />;
       case "friends":
         return <Friends />;
       case "live":
@@ -63,7 +85,8 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-warm">
-      {/* Top Nav */}
+      {/* Top Nav — hidden while inside a chat; the chat header replaces it */}
+      {!inChat && (
       <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-14">
@@ -90,9 +113,9 @@ export function Dashboard() {
                   className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors relative"
                 >
                   <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                  {unreadCount > 0 && (
+                  {bellBadgeCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                      {unreadCount > 9 ? "9+" : unreadCount}
+                      {bellBadgeCount > 9 ? "9+" : bellBadgeCount}
                     </span>
                   )}
                 </button>
@@ -112,8 +135,46 @@ export function Dashboard() {
                       </button>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
-                      {notifications.length > 0 ? (
-                        notifications.map((notif) => (
+                      {friendRequests.length > 0 && (
+                        <>
+                          <div className="px-3 pt-3 pb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-pink-600 dark:text-pink-400">
+                            <UserPlus className="h-3 w-3" />
+                            Connect Requests
+                          </div>
+                          {friendRequests.map((request) => (
+                            <div
+                              key={request.id}
+                              onClick={() => {
+                                setActiveTab("friends");
+                                setShowNotifications(false);
+                              }}
+                              className="p-3 flex items-center gap-3 bg-pink-50/50 dark:bg-pink-950/20 border-l-2 border-pink-500 hover:bg-pink-100/60 dark:hover:bg-pink-900/20 cursor-pointer transition-colors"
+                            >
+                              <Avatar
+                                name={request.sender?.name ?? "Unknown"}
+                                size="sm"
+                                status={request.sender?.status as any}
+                                showStatus
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-1">
+                                  <span className="font-semibold">
+                                    {request.sender?.name ?? "Someone"}
+                                  </span>{" "}
+                                  wants to connect with you
+                                </p>
+                                <p className="text-xs text-pink-500 font-medium mt-0.5">
+                                  Tap to respond
+                                </p>
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-pink-400 flex-shrink-0" />
+                            </div>
+                          ))}
+                          <div className="mx-3 my-2 border-t border-gray-100 dark:border-gray-800" />
+                        </>
+                      )}
+                      {regularNotifications.length > 0 ? (
+                        regularNotifications.map((notif) => (
                           <div
                             key={notif.id}
                             onClick={() => markAsRead(notif.id)}
@@ -139,9 +200,13 @@ export function Dashboard() {
                             )}
                           </div>
                         ))
-                      ) : (
+                      ) : friendRequests.length === 0 ? (
                         <p className="text-sm text-muted-foreground p-6 text-center">
                           No notifications yet
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground p-4 text-center">
+                          No other notifications
                         </p>
                       )}
                     </div>
@@ -179,9 +244,10 @@ export function Dashboard() {
           )}
         </div>
       </header>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-4 pb-24">
+      <main className={`max-w-6xl mx-auto px-4 ${inChat ? "py-0 pb-0" : "py-4 pb-24"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -195,7 +261,8 @@ export function Dashboard() {
         </AnimatePresence>
       </main>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation — hidden while inside a chat for a full-screen chat view */}
+      {!inChat && (
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-lg mx-auto flex items-center justify-around px-2">
           {tabs.map((tab) => {
@@ -221,9 +288,9 @@ export function Dashboard() {
                       isActive ? "scale-110" : ""
                     }`}
                   />
-                  {tab.id === "messages" && (
+                  {tab.id === "messages" && totalUnreadMessages > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
-                      3
+                      {totalUnreadMessages > 9 ? "9+" : totalUnreadMessages}
                     </span>
                   )}
                 </div>
@@ -235,6 +302,7 @@ export function Dashboard() {
           })}
         </div>
       </nav>
+      )}
     </div>
   );
 }
