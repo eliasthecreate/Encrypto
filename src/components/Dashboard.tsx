@@ -28,6 +28,7 @@ import { Live } from "./Live";
 import { Profile } from "./Profile";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { UserProfileView } from "./UserProfileView";
+import { GlobalSearch } from "./GlobalSearch";
 import type { ChatTarget } from "./Messages";
 import { toast } from "sonner";
 
@@ -43,20 +44,19 @@ const tabs = [
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("feed");
   const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [inChat, setInChat] = useState(false);
   const [pendingChat, setPendingChat] = useState<ChatTarget | null>(null);
   const [viewingUser, setViewingUser] = useState<ChatTarget | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { notifications } = useNotifications();
+  const { unreadCount } = useNotifications();
   const { requests: friendRequests } = useFriendRequests("bell");
   const { conversations } = useConversations();
 
   useMarkIncomingDelivered();
 
-  const regularNotifications = notifications.filter((n: any) => n.type !== "friend_request");
-  const unreadRegular = regularNotifications.filter((n: any) => !n.read).length;
-  const bellBadgeCount = unreadRegular + friendRequests.length;
+  const bellBadgeCount = unreadCount + friendRequests.length;
 
   const totalUnreadMessages = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
@@ -68,6 +68,7 @@ export function Dashboard() {
 
   const goToNotifications = () => {
     setShowSearch(false);
+    setSearchQuery("");
     setActiveTab("notifications");
   };
 
@@ -180,25 +181,16 @@ export function Dashboard() {
               </div>
             </div>
 
-            <AnimatePresence>
-              {showSearch && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="pb-3">
-                    <input
-                      type="text"
-                      placeholder="Search students, posts, and more..."
-                      className="cc-input w-full h-11 px-4 text-sm"
-                      autoFocus
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <GlobalSearch
+              open={showSearch}
+              query={searchQuery}
+              onQueryChange={setSearchQuery}
+              onClose={() => {
+                setShowSearch(false);
+                setSearchQuery("");
+              }}
+              onViewProfile={viewProfile}
+            />
           </div>
         </header>
       )}

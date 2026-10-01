@@ -47,7 +47,8 @@ export function Friends({
   const renderStudentCard = (
     student: { id: string; name: string; department?: string | null; year?: string | null; status: string; avatar_url?: string | null; is_verified?: boolean; university_domain?: string | null },
     showAddButton = false,
-    showMessageButton = false
+    showMessageButton = false,
+    matchReasons: string[] = []
   ) => (
     <motion.div
       key={student.id}
@@ -74,6 +75,18 @@ export function Friends({
           {student.department && <span>·</span>}
           <span>{student.year ?? ""}</span>
         </div>
+        {matchReasons.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1 mt-1.5">
+            {matchReasons.map((reason) => (
+              <span
+                key={reason}
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-purple-500/12 text-purple-300 border border-purple-500/20"
+              >
+                {reason}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
       {showAddButton && (
         pendingSends.has(student.id) ? (
@@ -191,7 +204,9 @@ export function Friends({
           ) : (
             <div className="space-y-1">
               {filteredSuggestions.length > 0 ? (
-                filteredSuggestions.map((s) => renderStudentCard(s, true))
+                filteredSuggestions.map((s: any) =>
+                  renderStudentCard(s, true, false, s.match_reasons ?? [])
+                )
               ) : (
                 <div className="text-center py-12">
                   <Users className="h-12 w-12 mx-auto text-slate-300 mb-3" />

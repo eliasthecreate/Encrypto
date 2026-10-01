@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNotifications, useFriendRequests } from "@/lib/supabase-hooks";
+import { supabase } from "@/lib/supabase";
 import {
   Bell,
   Settings,
@@ -80,11 +81,53 @@ export function NotificationsPanel({
   const [filter, setFilter] = useState<Filter>("all");
 
   const visible = useMemo(
-    () => notifications.filter((n: any) => matchesFilter(n.type ?? "", filter)),
+    () => {
+      // Friend requests already get their own actionable section above, so they
+      // are not repeated in the activity list.
+      const activity = notifications.filter(
+        (n: any) => n.type !== "friend_request" && matchesFilter(n.type ?? "", filter)
+      );
+      return activity;
+    },
     [notifications, filter]
   );
 
   const hasAny = requests.length > 0 || visible.length > 0;
+
+  // Load the profiles referenced by notifications so tapping one opens the
+  // right person rather than a placeholder.
+  const [actorsById, setActorsById] = useState<Record<string, any>>({});
+  const actorIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          notifications
+            .map((n: any) => n.actor_id)
+            .filter((id: string | null): id is string => Boolean(id))
+        )
+      ),
+    [notifications]
+  );
+
+  useEffect(() => {
+    if (actorIds.length === 0) return;
+    let active = true;
+    supabase
+      .from("profiles")
+      .select("id, name, avatar_url, status")
+      .in("id", actorIds)
+      .then(({ data }) => {
+        if (!active || !data) return;
+        const map: Record<string, any> = {};
+        data.forEach((p: any) => {
+          map[p.id] = p;
+        });
+        setActorsById(map);
+      });
+    return () => {
+      active = false;
+    };
+  }, [actorIds]);
 
   return (
     <div className="space-y-4">
@@ -203,10 +246,25 @@ export function NotificationsPanel({
         )}
 
         {!loading && visible.length > 0 && (
-          visible.map((notif: any) => (
+          visible.map((notif: any) => {
+            // Resolve the actor's profile so notifications link to a real person.
+            const actor = actorsById[notif.actor_id] ?? null;
+            const actorName = actor?.name ?? notif.title ?? "Someone";
+            return (
             <button
               key={notif.id}
-              onClick={() => markAsRead(notif.id)}
+              onClick={() => {
+                markAsRead(notif.id);
+                // Tapping a notification opens the person it is about.
+                if (notif.actor_id && onViewProfile) {
+                  onViewProfile({
+                    id: notif.actor_id,
+                    name: actorName,
+                    avatar_url: actor?.avatar_url ?? null,
+                    status: actor?.status ?? null,
+                  });
+                }
+              }}
               className={`w-full text-left cc-card cc-card-hover p-4 flex items-start gap-3 ${
                 notif.read ? "opacity-70" : ""
               }`}
@@ -237,7 +295,8 @@ export function NotificationsPanel({
                 <span className="h-2 w-2 rounded-full bg-purple-400 flex-shrink-0 mt-2" />
               )}
             </button>
-          ))
+            );
+          })
         )}
 
         {!loading && visible.length === 0 && requests.length === 0 && (

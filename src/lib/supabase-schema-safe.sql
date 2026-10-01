@@ -50,6 +50,9 @@ DROP POLICY IF EXISTS "Profiles are publicly readable" ON profiles;
 CREATE POLICY "Profiles are publicly readable" ON profiles FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+-- Needed so a row can be created for a freshly signed-up user.
+DROP POLICY IF EXISTS "Users can create own profile" ON profiles;
+CREATE POLICY "Users can create own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- POSTS
 CREATE TABLE IF NOT EXISTS posts (
@@ -374,18 +377,28 @@ CREATE TRIGGER on_friend_request_accepted
 
 -- NOTIFICATIONS
 CREATE TABLE IF NOT EXISTS notifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  type TEXT NOT NULL DEFAULT 'general',
-  title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  read BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+   actor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+   type TEXT NOT NULL DEFAULT 'general',
+   title TEXT NOT NULL,
+   body TEXT NOT NULL,
+   read BOOLEAN NOT NULL DEFAULT false,
+   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   );
+
+   -- actor_id records who caused the notification, so the UI can link to their
+   -- profile. Added separately because this table may already exist.
+   ALTER TABLE notifications ADD COLUMN IF NOT EXISTS actor_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
 
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can see own notifications" ON notifications;
 CREATE POLICY "Users can see own notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
+-- Any signed-in user may create a notification, addressed to somebody else
+-- (likes, comments, friend requests). Without this policy every insert is
+-- rejected by RLS, so no notifications are ever generated.
+DROP POLICY IF EXISTS "Users can create notifications" ON notifications;
+CREATE POLICY "Users can create notifications" ON notifications FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
 CREATE POLICY "Users can update own notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);
 

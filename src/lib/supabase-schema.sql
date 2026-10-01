@@ -404,9 +404,10 @@ CREATE OR REPLACE TRIGGER on_friend_request_accepted
 -- ============================================================
 -- NOTIFICATIONS
 -- ============================================================
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  actor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   type TEXT NOT NULL DEFAULT 'general',
   title TEXT NOT NULL,
   body TEXT NOT NULL,
@@ -414,9 +415,13 @@ CREATE TABLE notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS actor_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
+
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can see own notifications" ON notifications
   FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can create notifications" ON notifications
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Users can update own notifications" ON notifications
   FOR UPDATE USING (auth.uid() = user_id);
 

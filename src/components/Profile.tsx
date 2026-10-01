@@ -24,6 +24,7 @@ import {
   List,
   LayoutGrid,
   ChevronDown,
+  Check,
 } from "lucide-react";
 import { useProfile, useProfileStats, useUserPosts, useFriends } from "@/lib/supabase-hooks";
 import { useAuth } from "@/lib/auth-context";
@@ -72,6 +73,28 @@ export function Profile() {
     setUploadingAvatar(false);
   };
 
+  const STATUS_OPTIONS = [
+  { id: "online", label: "Online", dot: "bg-green-500" },
+  { id: "away", label: "Away", dot: "bg-yellow-500" },
+  { id: "busy", label: "Busy", dot: "bg-red-500" },
+  { id: "offline", label: "Invisible", dot: "bg-gray-400" },
+] as const;
+
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+
+  const changeStatus = async (next: string) => {
+    if (next === (profile?.status ?? "offline")) {
+      setShowStatusMenu(false);
+      return;
+    }
+    setSavingStatus(true);
+    await updateProfile({ status: next } as any);
+    setSavingStatus(false);
+    setShowStatusMenu(false);
+    toast.success(next === "offline" ? "You are now appearing offline" : `Status set to ${next}`);
+  };
+
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -105,6 +128,7 @@ export function Profile() {
   const joinedDate = p?.created_at
     ? new Date(p.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : null;
+  const currentStatus = (p?.status ?? "offline") as "online" | "away" | "busy" | "offline";
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -185,6 +209,46 @@ export function Profile() {
               </span>
               <span>·</span>
               <span>{joinedDate ? `Joined ${joinedDate}` : ""}</span>
+            </div>
+
+            {/* Presence: lets the user choose what others see on their avatar */}
+            <div className="relative mt-2.5">
+              <button
+                onClick={() => setShowStatusMenu((v) => !v)}
+                disabled={savingStatus}
+                aria-expanded={showStatusMenu}
+                className="inline-flex items-center gap-2 h-8 pl-2.5 pr-3 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs font-medium text-slate-300 hover:border-purple-500/40 hover:text-purple-200 transition-colors disabled:opacity-60"
+              >
+                <span
+                  className={`h-2.5 w-2.5 rounded-full ${
+                    STATUS_OPTIONS.find((s) => s.id === currentStatus)?.dot ?? "bg-gray-400"
+                  } ${currentStatus === "online" ? "live-dot" : ""}`}
+                />
+                {savingStatus ? "Saving..." : STATUS_OPTIONS.find((s) => s.id === currentStatus)?.label}
+              </button>
+
+              {showStatusMenu && (
+                <>
+                  <div className="fixed inset-0 z-20" onClick={() => setShowStatusMenu(false)} />
+                  <div className="absolute top-9 left-0 z-30 w-44 rounded-2xl bg-[#16162e] border border-white/10 shadow-2xl shadow-black/50 p-1.5">
+                    {STATUS_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => changeStatus(option.id)}
+                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-colors ${
+                          option.id === currentStatus
+                            ? "bg-purple-500/15 text-purple-200"
+                            : "text-slate-300 hover:bg-white/[0.06]"
+                        }`}
+                      >
+                        <span className={`h-2.5 w-2.5 rounded-full ${option.dot}`} />
+                        {option.label}
+                        {option.id === currentStatus && <Check className="h-3.5 w-3.5 ml-auto" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Detail line (work · location · school) */}
