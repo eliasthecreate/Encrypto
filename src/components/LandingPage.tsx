@@ -1,30 +1,11 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { GraduationCap, ArrowRight } from "lucide-react";
 
 export function LandingPage() {
-  const [heroFailed, setHeroFailed] = useState(false);
-
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0d0d1a] flex flex-col">
-      {!heroFailed && (
-        <img
-          src="./campus-hero.jpg"
-          alt=""
-          aria-hidden="true"
-          onError={() => setHeroFailed(true)}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-
-      <div
-        className={`absolute inset-0 ${
-          heroFailed
-            ? "bg-[radial-gradient(120%_100%_at_50%_0%,rgba(124,58,237,0.45),rgba(236,72,153,0.22)_45%,rgba(13,13,26,1)_100%)]"
-            : "bg-gradient-to-b from-[#0d0d1a]/80 via-[#0d0d1a]/70 to-[#0d0d1a]"
-        }`}
-      />
+      <div className="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(124,58,237,0.45),rgba(236,72,153,0.22)_45%,rgba(13,13,26,1)_100%)]" />
       <div className="absolute inset-0 bg-grid opacity-60" />
 
       <div className="absolute -top-24 -left-16 h-72 w-72 rounded-full bg-purple-600/25 blur-3xl" />
@@ -33,7 +14,7 @@ export function LandingPage() {
       <header className="relative z-10 px-6 pt-7">
         <Link to="/" className="inline-flex items-center gap-2.5">
           <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-900/50">
-            <GraduationCap className="h-4.5 w-4.5 text-white" />
+            <GraduationCap className="h-[1.125rem] w-[1.125rem] text-white" />
           </span>
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Campus</span>
@@ -67,13 +48,13 @@ export function LandingPage() {
 
           <div className="mt-9 flex flex-col gap-3">
             <Link to="/auth?mode=signup" className="block">
-              <span className="cc-gradient-btn w-full h-13 py-3.5 flex items-center justify-center gap-2 text-[15px]">
+              <span className="cc-gradient-btn w-full h-[3.25rem] py-3.5 flex items-center justify-center gap-2 text-[15px]">
                 Get Started
                 <ArrowRight className="h-4 w-4" />
               </span>
             </Link>
             <Link to="/auth?mode=login" className="block">
-              <span className="cc-outline-btn w-full h-13 py-3.5 flex items-center justify-center text-[15px]">
+              <span className="cc-outline-btn w-full h-[3.25rem] py-3.5 flex items-center justify-center text-[15px]">
                 Log In
               </span>
             </Link>

@@ -101,7 +101,7 @@ export function Dashboard() {
                 className="flex items-center gap-2.5 min-w-0"
               >
                 <span className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-900/40 flex-shrink-0">
-                  <GraduationCap className="h-4.5 w-4.5 text-white" />
+                  <GraduationCap className="h-[1.125rem] w-[1.125rem] text-white" />
                 </span>
                 <span className="font-bold text-[17px] tracking-tight truncate">
                   <span className="text-white">Campus</span>
@@ -144,7 +144,7 @@ export function Dashboard() {
                   aria-label="Sign out"
                   className="h-9 w-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
                 >
-                  <LogOut className="h-4.5 w-4.5" />
+                  <LogOut className="h-[1.125rem] w-[1.125rem]" />
                 </button>
 
                 <Avatar

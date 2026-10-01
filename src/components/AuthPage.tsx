@@ -229,7 +229,7 @@ export function AuthPage() {
             className="cc-gradient-btn w-full h-12 text-sm tracking-wide flex items-center justify-center gap-2"
           >
             {loading ? (
-              <Loader2 className="h-4.5 w-4.5 animate-spin" />
+              <Loader2 className="h-[1.125rem] w-[1.125rem] animate-spin" />
             ) : (
               <>
                 {isLogin ? "Log In" : "Create Account"}

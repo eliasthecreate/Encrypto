@@ -101,7 +101,7 @@ export function NotificationsPanel({
             aria-label="Notification settings"
             className="h-9 w-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
           >
-            <Settings className="h-4.5 w-4.5" />
+            <Settings className="h-[1.125rem] w-[1.125rem]" />
           </button>
         </div>
       </div>
