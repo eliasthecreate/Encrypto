@@ -1,0 +1,5 @@
+{
+  "project": "campus-connect-icu",
+  "functions": "src/convex/",
+  "generated": "src/convex/_generated/"
+}

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "78672114803",
+    "firebase_url": "https://campusconnecticu-6729b-default-rtdb.firebaseio.com",
+    "project_id": "campusconnecticu-6729b",
+    "storage_bucket": "campusconnecticu-6729b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:78672114803:android:2d94651a71631b8a36e606",
+        "android_client_info": {
+          "package_name": "com.icu.campusconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsxQ-2vC6gy-ChxN7xj4oqpHhy9004OU0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
