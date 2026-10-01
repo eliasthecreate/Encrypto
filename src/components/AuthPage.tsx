@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams, Link, Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth-context";
 import { motion } from "framer-motion";
@@ -12,9 +12,39 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
-import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.52 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.63v3.02h3.88c2.27-2.09 3.57-5.17 3.57-8.89Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.96-1.08 7.95-2.91l-3.88-3.02c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.11A12 12 0 0 0 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.29a12 12 0 0 0 0 10.76l3.98-3.11Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.29 6.62l3.98 3.11C6.22 6.88 8.87 4.77 12 4.77Z"
+      />
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-white" aria-hidden="true">
+      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08ZM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25Z" />
+    </svg>
+  );
+}
 
 export function AuthPage() {
   const [searchParams] = useSearchParams();
@@ -25,6 +55,7 @@ export function AuthPage() {
   const [isLogin, setIsLogin] = useState(mode === "login");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   if (isAuthenticated) {
@@ -50,176 +81,206 @@ export function AuthPage() {
     }
   };
 
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setForm({ name: "", email: "", password: "" });
+  };
+
   return (
-    <div className="min-h-screen flex bg-warm">
-      {/* Left - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white rounded-full blur-3xl" />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative text-center px-12"
-        >
-          <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mx-auto mb-8">
-            <GraduationCap className="h-10 w-10 text-white" />
-          </div>
-          <h2 className="text-4xl font-bold text-white mb-4">
-            {isLogin ? "Welcome Back!" : "Join Campus Connect"}
-          </h2>
-          <p className="text-white/80 text-lg max-w-md mx-auto leading-relaxed">
+    <div className="min-h-screen bg-warm flex flex-col items-center justify-center px-5 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-[26rem]"
+      >
+        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <span className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-900/50">
+            <GraduationCap className="h-5 w-5 text-white" />
+          </span>
+          <span className="text-xl font-bold tracking-tight">
+            <span className="text-white">Campus</span>
+            <span className="text-purple-400">Connect</span>
+          </span>
+        </Link>
+
+        <div className="text-center mb-7">
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            {isLogin ? "Welcome Back" : "Create Account"}
+          </h1>
+          <p className="text-sm text-slate-400 mt-2">
             {isLogin
-              ? "Sign in to catch up with campus life, messages, and live streams."
-              : "Create your account and start connecting with fellow ICU students."}
+              ? "Log in to pick up where you left off."
+              : "Join the ICU campus community in seconds."}
           </p>
-          <div className="mt-12 space-y-4 text-left">
-            {[
-              "Connect with fellow ICU students",
-              "Share campus moments & events",
-              "Real-time messaging & live streams",
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
-                className="flex items-center gap-3 text-white/90"
-              >
-                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span>{item}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+        </div>
 
-      {/* Right - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gradient">
-              Campus Connect
-            </span>
-          </div>
-
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold dark:text-white mb-2">
-              {isLogin ? "Sign in" : "Create account"}
-            </h1>
-            <p className="text-muted-foreground">
-              {isLogin ? "Welcome back to Campus Connect ICU" : "Join your campus community"}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium mb-1.5 text-foreground/80 dark:text-gray-300">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="John Doe"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required={!isLogin}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            )}
-
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
             <div>
-              <label className="block text-sm font-medium mb-1.5 text-foreground/80 dark:text-gray-300">
-                Email Address
+              <label className="block text-xs font-semibold text-slate-300 mb-2">
+                Full Name
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
                 <Input
-                  type="email"
-                  placeholder="you@icu.ac.jp"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="pl-10"
+                  type="text"
+                  placeholder="Elias Mwape"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required={!isLogin}
+                  className="cc-input h-12 pl-10 text-sm"
                 />
               </div>
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-medium mb-1.5 text-foreground/80 dark:text-gray-300">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required
-                  className="pl-10 pr-10"
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Email / Student ID
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
+              <Input
+                type="email"
+                placeholder="you@icu.ac.zm"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+                className="cc-input h-12 pl-10 text-sm"
+              />
             </div>
+          </div>
 
-            <Button type="submit" variant="gradient" className="w-full h-12" disabled={loading}>
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <>
-                  {isLogin ? "Sign In" : "Create Account"}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                minLength={6}
+                className="cc-input h-12 pl-10 pr-11 text-sm"
+              />
               <button
-                onClick={() => { setIsLogin(!isLogin); setForm({ name: "", email: "", password: "" }); }}
-                className="text-purple-500 hover:text-purple-600 font-medium transition-colors"
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-purple-300 transition-colors"
               >
-                {isLogin ? "Sign up" : "Sign in"}
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
-            </p>
+            </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors">
-              ← Back to home
-            </Link>
+          <div className="flex items-center justify-between pt-0.5">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <span
+                className={`h-4 w-4 rounded-[5px] flex items-center justify-center transition-colors ${
+                  remember
+                    ? "bg-gradient-to-br from-purple-600 to-pink-500"
+                    : "border border-white/20 bg-white/5"
+                }`}
+              >
+                {remember && (
+                  <svg
+                    className="h-2.5 w-2.5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={4}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </span>
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              <span className="text-xs text-slate-400">Remember me</span>
+            </label>
+            <button
+              type="button"
+              className="text-xs font-medium text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Forgot password?
+            </button>
           </div>
-        </motion.div>
-      </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="cc-gradient-btn w-full h-12 text-sm tracking-wide flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <Loader2 className="h-4.5 w-4.5 animate-spin" />
+            ) : (
+              <>
+                {isLogin ? "Log In" : "Create Account"}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="cc-divider-text my-6">or continue with</div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            disabled
+            title="Social sign-in coming soon"
+            className="cc-outline-btn h-11 flex items-center justify-center gap-2 opacity-60 cursor-not-allowed"
+          >
+            <GoogleIcon />
+            <span className="text-xs">Google</span>
+          </button>
+          <button
+            type="button"
+            disabled
+            title="Social sign-in coming soon"
+            className="cc-outline-btn h-11 flex items-center justify-center gap-2 opacity-60 cursor-not-allowed"
+          >
+            <AppleIcon />
+            <span className="text-xs">Apple</span>
+          </button>
+        </div>
+
+        <p className="text-center text-sm text-slate-400 mt-7">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button
+            onClick={toggleMode}
+            className="font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            {isLogin ? "Sign up" : "Log in"}
+          </button>
+        </p>
+
+        <div className="text-center mt-8">
+          <Link
+            to="/"
+            className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            ← Back to home
+          </Link>
+        </div>
+      </motion.div>
     </div>
   );
 }

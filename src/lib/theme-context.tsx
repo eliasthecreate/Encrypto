@@ -22,7 +22,7 @@ const STORAGE_KEY = "campus-connect-theme";
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-    return stored === "dark" ? "dark" : "light";
+    return stored === "light" ? "light" : "dark";
   });
 
   useEffect(() => {
