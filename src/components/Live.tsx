@@ -65,8 +65,8 @@ export function Live() {
     <div className="max-w-2xl mx-auto space-y-4">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-xl font-bold dark:text-white mb-1">Live</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Live</h1>
+          <p className="text-sm text-slate-400">
             Watch and broadcast campus events live
           </p>
         </div>
@@ -88,15 +88,15 @@ export function Live() {
           exit={{ opacity: 0, height: 0 }}
           className="overflow-hidden"
         >
-          <Card className="border-purple-200 dark:border-purple-900 bg-purple-50/30 dark:bg-purple-950/20 mb-4">
+          <Card className="border-purple-500/25 bg-purple-500/12 mb-4">
             <CardContent className="p-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-12 w-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
                   <Video className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm dark:text-white">Start Broadcasting</h3>
-                  <p className="text-xs text-muted-foreground">Share your campus moment live</p>
+                  <h3 className="font-semibold text-sm text-white">Start Broadcasting</h3>
+                  <p className="text-xs text-slate-400">Share your campus moment live</p>
                 </div>
               </div>
               <input
@@ -104,13 +104,13 @@ export function Live() {
                 placeholder="Stream title..."
                 value={streamTitle}
                 onChange={(e) => setStreamTitle(e.target.value)}
-                className="w-full h-10 px-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm dark:text-gray-200 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                className="w-full h-10 px-4 rounded-xl bg-[#1e1e3a] border border-white/[0.1] text-sm text-slate-200 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
               />
               <textarea
                 placeholder="Description (optional)..."
                 value={streamDesc}
                 onChange={(e) => setStreamDesc(e.target.value)}
-                className="w-full h-20 px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm dark:text-gray-200 mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                className="w-full h-20 px-4 py-2 rounded-xl bg-[#1e1e3a] border border-white/[0.1] text-sm text-slate-200 mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20"
               />
               <div className="flex gap-2 mb-3 flex-wrap">
                 {Object.entries(categoryLabels).map(([key, label]) => (
@@ -120,7 +120,7 @@ export function Live() {
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                       streamCategory === key
                         ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent"
-                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:border-purple-300 dark:hover:border-purple-600 hover:text-purple-600 dark:hover:text-purple-400"
+                        : "bg-[#1e1e3a] border-white/[0.1] text-slate-300 hover:border-purple-300 dark:hover:border-purple-600 hover:text-purple-300 dark:hover:text-purple-400"
                     }`}
                   >
                     {categoryIcons[key]}
@@ -140,8 +140,8 @@ export function Live() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <div className="h-2.5 w-2.5 rounded-full bg-red-500 live-dot" />
-          <h2 className="font-semibold text-sm dark:text-white">Live Now</h2>
-          <span className="text-xs text-muted-foreground">
+          <h2 className="font-semibold text-sm text-white">Live Now</h2>
+          <span className="text-xs text-slate-400">
             ({loading ? "..." : liveStreams.length} streams)
           </span>
         </div>
@@ -151,10 +151,10 @@ export function Live() {
             <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
           </div>
         ) : liveStreams.length === 0 ? (
-          <Card className="border-dashed border-2 border-gray-200 dark:border-gray-700 glass-card">
+          <Card className="border-dashed border-2 border-white/[0.1] glass-card">
             <CardContent className="p-8 text-center">
-              <Radio className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">
+              <Radio className="h-10 w-10 text-slate-500 mx-auto mb-3" />
+              <p className="text-sm text-slate-400">
                 No live streams right now. Be the first to go live!
               </p>
             </CardContent>
@@ -195,21 +195,21 @@ export function Live() {
                     <div className="flex items-start gap-3">
                       <Avatar name={stream.host?.name ?? "Unknown"} size="md" />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm dark:text-white line-clamp-1">{stream.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <h3 className="font-semibold text-sm text-white line-clamp-1">{stream.title}</h3>
+                        <p className="text-xs text-slate-400 mt-0.5">
                           {stream.host?.name ?? "Unknown"} · {stream.host?.department ?? ""}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{stream.description ?? ""}</p>
-                        <div className="flex items-center gap-3 mt-3 pt-2 border-t border-gray-50 dark:border-gray-800">
-                          <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-pink-500 transition-colors">
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{stream.description ?? ""}</p>
+                        <div className="flex items-center gap-3 mt-3 pt-2 border-t border-white/[0.07]">
+                          <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-pink-500 transition-colors">
                             <Heart className="h-3.5 w-3.5" />
                             React
                           </button>
-                          <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-purple-500 transition-colors">
+                          <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-purple-500 transition-colors">
                             <MessageCircle className="h-3.5 w-3.5" />
                             Chat
                           </button>
-                          <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-orange-500 transition-colors">
+                          <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-orange-300 transition-colors">
                             <Share2 className="h-3.5 w-3.5" />
                             Share
                           </button>

@@ -94,17 +94,17 @@ function EmojiPicker({ onSelect, onClose }: { onSelect: (emoji: string) => void;
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-      className="absolute bottom-16 left-0 z-50 w-72 sm:w-80 max-w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden"
+      className="absolute bottom-16 left-0 z-50 w-72 sm:w-80 max-w-full bg-[#1e1e3a] rounded-2xl shadow-2xl border border-white/[0.08] overflow-hidden"
     >
-      <div className="flex gap-1 p-2 border-b border-gray-100 dark:border-gray-700 overflow-x-auto">
+      <div className="flex gap-1 p-2 border-b border-white/[0.08] overflow-x-auto">
         {EMOJI_CATEGORIES.map((cat, i) => (
           <button
             key={cat.name}
             onClick={() => setCategory(i)}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
               category === i
-                ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300"
-                : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                ? "bg-purple-500/15 text-purple-300"
+                : "text-slate-400 hover:bg-white/[0.07]"
             }`}
           >
             {cat.name}
@@ -116,7 +116,7 @@ function EmojiPicker({ onSelect, onClose }: { onSelect: (emoji: string) => void;
           <button
             key={emoji}
             onClick={() => onSelect(emoji)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-lg transition-all hover:scale-125"
+            className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-white/[0.07] text-lg transition-all hover:scale-125"
           >
             {emoji}
           </button>
@@ -193,7 +193,7 @@ function VoiceRecorder({ onSend, onCancel }: { onSend: (blob: Blob) => void; onC
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className="absolute bottom-16 left-0 right-0 z-50 mx-3 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700"
+      className="absolute bottom-16 left-0 right-0 z-50 mx-3 p-3 bg-[#1e1e3a] rounded-2xl shadow-2xl border border-white/[0.08]"
     >
       <div className="flex items-center gap-3">
         {!audioUrl ? (
@@ -202,21 +202,21 @@ function VoiceRecorder({ onSend, onCancel }: { onSend: (blob: Blob) => void; onC
               onClick={recording ? stopRecording : startRecording}
               className={`h-12 w-12 rounded-full flex items-center justify-center transition-all ${
                 recording
-                  ? "bg-red-500 hover:bg-red-600 animate-pulse"
+                  ? "bg-rose-500/120 hover:bg-red-600 animate-pulse"
                   : "bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105"
               }`}
             >
               {recording ? <StopCircle className="h-6 w-6 text-white" /> : <Mic className="h-6 w-6 text-white" />}
             </button>
             <div className="flex-1">
-              <div className="text-sm font-medium dark:text-white">
+              <div className="text-sm font-medium text-white">
                 {recording ? "Recording..." : "Tap to record"}
               </div>
-              <div className={`text-xs font-mono ${recording ? "text-red-500" : "text-gray-400"}`}>
+              <div className={`text-xs font-mono ${recording ? "text-rose-400" : "text-gray-400"}`}>
                 {formatDuration(duration)}
               </div>
             </div>
-            <button onClick={onCancel} className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center">
+            <button onClick={onCancel} className="h-8 w-8 rounded-full hover:bg-white/[0.07] flex items-center justify-center">
               <X className="h-4 w-4 text-gray-400" />
             </button>
           </>
@@ -224,16 +224,16 @@ function VoiceRecorder({ onSend, onCancel }: { onSend: (blob: Blob) => void; onC
           <>
             <button
               onClick={togglePlayback}
-              className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center hover:bg-purple-200 dark:hover:bg-purple-900/60"
+              className="h-10 w-10 rounded-full bg-purple-500/15 flex items-center justify-center hover:bg-purple-500/20"
             >
-              {isPlaying ? <Pause className="h-5 w-5 text-purple-600" /> : <Play className="h-5 w-5 text-purple-600" />}
+              {isPlaying ? <Pause className="h-5 w-5 text-purple-300" /> : <Play className="h-5 w-5 text-purple-300" />}
             </button>
             <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} />
-            <div className="flex-1 text-sm text-gray-500">Preview</div>
+            <div className="flex-1 text-sm text-slate-400">Preview</div>
             <Button size="sm" variant="gradient" onClick={() => audioBlob && onSend(audioBlob)} className="h-9">
               Send
             </Button>
-            <button onClick={onCancel} className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center">
+            <button onClick={onCancel} className="h-8 w-8 rounded-full hover:bg-white/[0.07] flex items-center justify-center">
               <X className="h-4 w-4 text-gray-400" />
             </button>
           </>
@@ -265,24 +265,24 @@ function AttachmentPicker({ onSend, onClose }: { onSend: (file: File) => void; o
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-      className="absolute bottom-16 left-0 z-50 p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700"
+      className="absolute bottom-16 left-0 z-50 p-2 bg-[#1e1e3a] rounded-2xl shadow-2xl border border-white/[0.08]"
     >
       <div className="grid grid-cols-4 gap-1">
         {[
-          { icon: Image, label: "Photo", color: "text-blue-500 bg-blue-50 dark:bg-blue-900/20", action: () => handleFilePick("image/*") },
-          { icon: FileText, label: "Document", color: "text-orange-500 bg-orange-50 dark:bg-orange-900/20", action: () => handleFilePick(".pdf,.doc,.docx,.txt") },
-          { icon: File, label: "Spreadsheet", color: "text-green-500 bg-green-50 dark:bg-green-900/20", action: () => handleFilePick(".xls,.xlsx,.csv") },
-          { icon: Music, label: "Audio", color: "text-pink-500 bg-pink-50 dark:bg-pink-900/20", action: () => handleFilePick("audio/*") },
+          { icon: Image, label: "Photo", color: "text-blue-500 bg-sky-500/12 bg-sky-500/15", action: () => handleFilePick("image/*") },
+          { icon: FileText, label: "Document", color: "text-orange-300 bg-orange-400/12 bg-orange-400/15", action: () => handleFilePick(".pdf,.doc,.docx,.txt") },
+          { icon: File, label: "Spreadsheet", color: "text-green-500 bg-emerald-500/12 bg-emerald-500/15", action: () => handleFilePick(".xls,.xlsx,.csv") },
+          { icon: Music, label: "Audio", color: "text-pink-500 bg-pink-50 bg-pink-500/15", action: () => handleFilePick("audio/*") },
         ].map((item) => (
           <button
             key={item.label}
             onClick={item.action}
-            className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white/[0.03] hover:bg-white/[0.07] transition-all"
           >
             <div className={`h-10 w-10 rounded-xl ${item.color} flex items-center justify-center`}>
               <item.icon className="h-5 w-5" />
             </div>
-            <span className="text-[10px] text-gray-500 dark:text-gray-400">{item.label}</span>
+            <span className="text-[10px] text-slate-400">{item.label}</span>
           </button>
         ))}
       </div>
@@ -315,14 +315,14 @@ function PollCreator({ onSend, onClose }: { onSend: (question: string, options: 
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-      className="absolute bottom-16 left-0 right-0 z-50 mx-3 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700"
+      className="absolute bottom-16 left-0 right-0 z-50 mx-3 p-4 bg-[#1e1e3a] rounded-2xl shadow-2xl border border-white/[0.08]"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-purple-500" />
-          <span className="font-medium text-sm dark:text-white">Create Poll</span>
+          <span className="font-medium text-sm text-white">Create Poll</span>
         </div>
-        <button onClick={onClose} className="h-6 w-6 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center">
+        <button onClick={onClose} className="h-6 w-6 rounded-full hover:bg-white/[0.07] flex items-center justify-center">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -331,7 +331,7 @@ function PollCreator({ onSend, onClose }: { onSend: (question: string, options: 
         placeholder="Ask a question..."
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        className="w-full h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-700 border-0 text-sm dark:text-white mb-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+        className="w-full h-9 px-3 rounded-xl bg-white/[0.05] bg-[#26264a] border-0 text-sm text-white mb-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
       />
       <div className="space-y-1.5 mb-3">
         {options.map((opt, i) => (
@@ -341,10 +341,10 @@ function PollCreator({ onSend, onClose }: { onSend: (question: string, options: 
               placeholder={`Option ${i + 1}`}
               value={opt}
               onChange={(e) => updateOption(i, e.target.value)}
-              className="flex-1 h-8 px-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 text-xs dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500/20"
+              className="flex-1 h-8 px-3 rounded-lg bg-white/[0.03] bg-[#26264a]/50 border border-white/[0.1] border-white/[0.12] text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500/20"
             />
             {options.length > 2 && (
-              <button onClick={() => removeOption(i)} className="h-6 w-6 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center">
+              <button onClick={() => removeOption(i)} className="h-6 w-6 rounded-full hover:bg-rose-500/12 hover:bg-rose-500/15 flex items-center justify-center">
                 <X className="h-3 w-3 text-red-400" />
               </button>
             )}
@@ -352,7 +352,7 @@ function PollCreator({ onSend, onClose }: { onSend: (question: string, options: 
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <button onClick={addOption} className="text-xs text-purple-500 hover:text-purple-600 font-medium">
+        <button onClick={addOption} className="text-xs text-purple-500 hover:text-purple-300 font-medium">
           + Add option
         </button>
         <div className="flex-1" />
@@ -377,8 +377,8 @@ function PollDisplay({ pollMessageId, question, options, votes, myVote, onVote }
   const voted = !!myVote;
 
   return (
-    <div className="mt-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
-      <p className="text-xs font-semibold mb-2 dark:text-white">{question}</p>
+    <div className="mt-2 p-3 rounded-xl bg-white/[0.03] bg-[#26264a]/50 border border-white/[0.1] border-white/[0.12]">
+      <p className="text-xs font-semibold mb-2 text-white">{question}</p>
       <div className="space-y-1.5">
         {options.map((opt) => {
           const count = votes[opt] || 0;
@@ -389,16 +389,16 @@ function PollDisplay({ pollMessageId, question, options, votes, myVote, onVote }
               key={opt}
               onClick={() => { if (pollMessageId && onVote) onVote(pollMessageId, opt); }}
               className={`relative h-8 rounded-lg overflow-hidden cursor-pointer transition-all active:scale-[0.98] ${
-                isMyVote ? "ring-2 ring-purple-500" : "hover:ring-1 hover:ring-gray-300 dark:hover:ring-gray-600"
+                isMyVote ? "ring-2 ring-purple-500" : "hover:ring-1 hover:ring-white/25"
               }`}
             >
               <div
-                className="absolute inset-0 bg-purple-100 dark:bg-purple-900/30 transition-all"
+                className="absolute inset-0 bg-purple-500/15 bg-purple-500/15 transition-all"
                 style={{ width: `${pct}%` }}
               />
               <div className="relative flex items-center justify-between h-full px-3">
-                <span className="text-xs font-medium dark:text-white truncate">{opt}</span>
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 ml-2">{count} vote{count !== 1 ? "s" : ""}</span>
+                <span className="text-xs font-medium text-white truncate">{opt}</span>
+                <span className="text-[10px] text-slate-400 ml-2">{count} vote{count !== 1 ? "s" : ""}</span>
               </div>
             </div>
           );
@@ -445,7 +445,7 @@ function CallDialog({ type, otherUser, onEnd }: { type: "voice" | "video"; other
       <div className="flex items-center gap-6 mt-8">
         <button
           onClick={onEnd}
-          className="h-14 w-14 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-lg"
+          className="h-14 w-14 rounded-full bg-rose-500/120 hover:bg-red-600 flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-lg"
         >
           {type === "video" ? <VideoOff className="h-6 w-6 text-white" /> : <PhoneOff className="h-6 w-6 text-white" />}
         </button>
@@ -509,19 +509,19 @@ function ProfileSheet({ isGroup, conv, onClose }: { isGroup: boolean; conv: any;
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: 40, opacity: 0, scale: 0.98 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-sm max-h-[80dvh] overflow-y-auto bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-2xl"
+        className="w-full sm:max-w-sm max-h-[80dvh] overflow-y-auto bg-[#13132a] rounded-t-3xl sm:rounded-3xl p-6 border border-white/[0.07] shadow-2xl"
       >
         <div className="flex flex-col items-center text-center mb-5">
           {isGroup ? (
             <>
               <Avatar name={conv?.otherUser?.name || "Group"} size="xl" className="from-pink-500 to-orange-400" />
-              <h3 className="mt-3 font-semibold text-lg dark:text-white">{conv?.otherUser?.name || "Group"}</h3>
+              <h3 className="mt-3 font-semibold text-lg text-white">{conv?.otherUser?.name || "Group"}</h3>
               <p className="text-xs text-muted-foreground mt-1">{members.length} members</p>
             </>
           ) : (
             <>
               <Avatar name={profile?.name || conv?.otherUser?.name || "?"} size="xl" status={profile?.status || conv?.otherUser?.status} showStatus />
-              <h3 className="mt-3 font-semibold text-lg dark:text-white">{profile?.name || conv?.otherUser?.name || "Loading..."}</h3>
+              <h3 className="mt-3 font-semibold text-lg text-white">{profile?.name || conv?.otherUser?.name || "Loading..."}</h3>
               <p className="text-xs text-muted-foreground mt-1 capitalize">{profile?.status || conv?.otherUser?.status || "offline"}</p>
             </>
           )}
@@ -533,27 +533,27 @@ function ProfileSheet({ isGroup, conv, onClose }: { isGroup: boolean; conv: any;
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Participants</p>
             {members.map((m: any) => (
-              <div key={m.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800">
+              <div key={m.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03]">
                 <Avatar name={m.name || "?"} size="sm" />
-                <span className="text-sm dark:text-white truncate">{m.name}</span>
+                <span className="text-sm text-white truncate">{m.name}</span>
               </div>
             ))}
           </div>
         ) : (
           <div className="space-y-3 text-sm">
             {(profile?.department || profile?.year) && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03]">
                 <User className="h-4 w-4 text-purple-500" />
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Department · Year</p>
-                  <p className="dark:text-white">{profile.department}{profile.year ? ` · ${profile.year}` : ""}</p>
+                  <p className="text-white">{profile.department}{profile.year ? ` · ${profile.year}` : ""}</p>
                 </div>
               </div>
             )}
             {profile?.bio ? (
-              <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+              <div className="p-3 rounded-xl bg-white/[0.03]">
                 <p className="text-xs text-muted-foreground mb-1">About</p>
-                <p className="dark:text-white whitespace-pre-wrap">{profile.bio}</p>
+                <p className="text-white whitespace-pre-wrap">{profile.bio}</p>
               </div>
             ) : null}
             {profile?.created_at && (
@@ -562,7 +562,7 @@ function ProfileSheet({ isGroup, conv, onClose }: { isGroup: boolean; conv: any;
           </div>
         )}
 
-        <button onClick={onClose} className="mt-6 w-full h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-medium dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+        <button onClick={onClose} className="mt-6 w-full h-10 rounded-xl bg-white/[0.05] text-sm font-medium text-white hover:bg-white/[0.1] hover:bg-white/[0.07] transition-colors">
           Close
         </button>
       </motion.div>
@@ -612,20 +612,20 @@ function ChatSettings({
   const isMuted = !!muteUntil && (muteUntil === "forever" || new Date(muteUntil).getTime() > Date.now());
   const themeLabel = CHAT_THEMES[chatTheme]?.label || "Default";
 
-  const row = "w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
+  const row = "w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.03] hover:bg-white/[0.07] transition-colors";
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="absolute top-14 right-2 z-50 w-64 max-h-[80dvh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700"
+      className="absolute top-14 right-2 z-50 w-64 max-h-[80dvh] overflow-y-auto bg-[#1e1e3a] rounded-2xl shadow-2xl border border-white/[0.08]"
     >
       <div className="p-1">
         {showNickname && (
           <button onClick={() => { setShowNickInput(!showNickInput); setShowThemeMenu(false); setShowMuteMenu(false); }} className={row}>
-            <Edit3 className="h-4 w-4 text-gray-500" />
-            <span className="text-sm dark:text-white">{showNickInput ? "Cancel" : "Set Nickname"}</span>
+            <Edit3 className="h-4 w-4 text-slate-400" />
+            <span className="text-sm text-white">{showNickInput ? "Cancel" : "Set Nickname"}</span>
           </button>
         )}
         {showNickname && showNickInput && (
@@ -636,7 +636,7 @@ function ChatSettings({
                 value={editNick}
                 onChange={(e) => setEditNick(e.target.value)}
                 placeholder="Nickname..."
-                className="flex-1 h-8 px-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-xs border-0 focus:outline-none focus:ring-1 focus:ring-purple-500/20 dark:text-white"
+                className="flex-1 h-8 px-2 rounded-lg bg-white/[0.05] bg-[#26264a] text-xs border-0 focus:outline-none focus:ring-1 focus:ring-purple-500/20 text-white"
                 autoFocus
               />
               <Button size="sm" variant="gradient" onClick={() => { onSetNickname(editNick); setShowNickInput(false); }} className="h-8 text-xs px-2">
@@ -651,20 +651,20 @@ function ChatSettings({
           {isGroup
             ? <Users className="h-4 w-4 text-pink-500" />
             : <User className="h-4 w-4 text-purple-500" />}
-          <span className="text-sm dark:text-white">{isGroup ? "Group Info" : "View Profile"}</span>
+          <span className="text-sm text-white">{isGroup ? "Group Info" : "View Profile"}</span>
         </button>
 
         {/* Search */}
         <button onClick={() => { onSearch(); onClose(); }} className={row}>
-          <Search className="h-4 w-4 text-gray-500" />
-          <span className="text-sm dark:text-white">Search in Chat</span>
+          <Search className="h-4 w-4 text-slate-400" />
+          <span className="text-sm text-white">Search in Chat</span>
         </button>
 
         {/* Theme */}
         <div className="relative">
           <button onClick={() => { setShowThemeMenu(!showThemeMenu); setShowMuteMenu(false); setShowNickInput(false); }} className={row}>
             <Palette className="h-4 w-4 text-fuchsia-500" />
-            <span className="flex-1 text-left text-sm dark:text-white">Theme</span>
+            <span className="flex-1 text-left text-sm text-white">Theme</span>
             <span className="text-[10px] text-gray-400">{themeLabel}</span>
             <ChevronRight className={`h-3.5 w-3.5 text-gray-400 transition-transform ${showThemeMenu ? "rotate-90" : ""}`} />
           </button>
@@ -672,9 +672,9 @@ function ChatSettings({
             <div className="px-2 pb-2 space-y-0.5">
               {Object.entries(CHAT_THEMES).map(([id, t]) => (
                 <button key={id} onClick={() => { onSetTheme(id); setShowThemeMenu(false); }}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.03] hover:bg-white/[0.07] transition-colors">
                   <span className="h-3.5 w-3.5 rounded-full shrink-0" style={{ background: `linear-gradient(90deg, ${t.from}, ${t.to})` }} />
-                  <span className="text-xs dark:text-white">{t.label}</span>
+                  <span className="text-xs text-white">{t.label}</span>
                   {chatTheme === id && <Check className="h-3 w-3 text-purple-500 ml-auto" />}
                 </button>
               ))}
@@ -685,22 +685,22 @@ function ChatSettings({
         {/* Mute Notifications */}
         <div className="relative">
           <button onClick={() => { setShowMuteMenu(!showMuteMenu); setShowThemeMenu(false); setShowNickInput(false); }} className={row}>
-            <BellOff className="h-4 w-4 text-gray-500" />
-            <span className="flex-1 text-left text-sm dark:text-white">Mute Notifications</span>
+            <BellOff className="h-4 w-4 text-slate-400" />
+            <span className="flex-1 text-left text-sm text-white">Mute Notifications</span>
             {isMuted && <span className="text-[10px] text-purple-500 font-semibold">Muted</span>}
             <ChevronRight className={`h-3.5 w-3.5 text-gray-400 transition-transform ${showMuteMenu ? "rotate-90" : ""}`} />
           </button>
           {showMuteMenu && (
             <div className="px-2 pb-2 space-y-0.5">
               <button onClick={() => { onMute(new Date(Date.now() + 8 * 3600 * 1000).toISOString()); setShowMuteMenu(false); }}
-                className="w-full text-left text-xs p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white">Mute for 8 hours</button>
+                className="w-full text-left text-xs p-2 rounded-lg hover:bg-white/[0.03] hover:bg-white/[0.07] text-white">Mute for 8 hours</button>
               <button onClick={() => { onMute(new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()); setShowMuteMenu(false); }}
-                className="w-full text-left text-xs p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white">Mute for 1 week</button>
+                className="w-full text-left text-xs p-2 rounded-lg hover:bg-white/[0.03] hover:bg-white/[0.07] text-white">Mute for 1 week</button>
               <button onClick={() => { onMute("forever"); setShowMuteMenu(false); }}
-                className="w-full text-left text-xs p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white">Mute forever</button>
+                className="w-full text-left text-xs p-2 rounded-lg hover:bg-white/[0.03] hover:bg-white/[0.07] text-white">Mute forever</button>
               {isMuted && (
                 <button onClick={() => { onMute(null); setShowMuteMenu(false); }}
-                  className="w-full text-left text-xs p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-purple-600 dark:text-purple-400">Unmute</button>
+                  className="w-full text-left text-xs p-2 rounded-lg hover:bg-white/[0.03] hover:bg-white/[0.07] text-purple-300">Unmute</button>
               )}
             </div>
           )}
@@ -708,30 +708,30 @@ function ChatSettings({
 
         {/* Empty Chat */}
         <button onClick={() => { onClearChat(); onClose(); }} className={row}>
-          <Eraser className="h-4 w-4 text-orange-500" />
-          <span className="text-sm dark:text-white">Empty Chat</span>
+          <Eraser className="h-4 w-4 text-orange-300" />
+          <span className="text-sm text-white">Empty Chat</span>
         </button>
 
         {/* Mark as Read / Unread */}
         <button onClick={() => { onMarkRead(); onClose(); }} className={row}>
           <CheckCheck className="h-4 w-4 text-emerald-500" />
-          <span className="text-sm dark:text-white">Mark as Read</span>
+          <span className="text-sm text-white">Mark as Read</span>
         </button>
         <button onClick={() => { onMarkUnread(); onClose(); }} className={row}>
-          <MailOpen className="h-4 w-4 text-gray-500" />
-          <span className="text-sm dark:text-white">Mark as Unread</span>
+          <MailOpen className="h-4 w-4 text-slate-400" />
+          <span className="text-sm text-white">Mark as Unread</span>
         </button>
 
         {/* Clear Chat */}
         <button onClick={() => { onClearChat(); onClose(); }} className={row}>
-          <Eraser className="h-4 w-4 text-orange-500" />
-          <span className="text-sm dark:text-white">Clear Chat</span>
+          <Eraser className="h-4 w-4 text-orange-300" />
+          <span className="text-sm text-white">Clear Chat</span>
         </button>
 
         {/* Delete Chat */}
-        <button onClick={() => { onDeleteChat(); onClose(); }} className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-          <Trash2 className="h-4 w-4 text-red-500" />
-          <span className="text-sm text-red-600 dark:text-red-400">Delete Chat</span>
+        <button onClick={() => { onDeleteChat(); onClose(); }} className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-rose-500/12 hover:bg-rose-500/15 transition-colors">
+          <Trash2 className="h-4 w-4 text-rose-400" />
+          <span className="text-sm text-rose-400">Delete Chat</span>
         </button>
       </div>
     </motion.div>
@@ -792,11 +792,11 @@ function MessageBubble({
       const icon = fileName?.endsWith(".pdf") ? "📄" : fileName?.match(/\.(doc|xls)/) ? "📊" : "📎";
       return (
         <a href={fileUrl} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-2 mt-1 p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+          className="flex items-center gap-2 mt-1 p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
         >
           <span className="text-lg">{icon}</span>
           <div className="min-w-0">
-            <p className="text-xs font-medium truncate dark:text-white">{fileName || "File"}</p>
+            <p className="text-xs font-medium truncate text-white">{fileName || "File"}</p>
             <p className="text-[10px] text-gray-400">Tap to open</p>
           </div>
         </a>
@@ -816,7 +816,7 @@ function MessageBubble({
     }
     if (type === "call") {
       return (
-        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
           <PhoneCall className="h-3.5 w-3.5" />
           {content || "Call ended"}
         </div>
@@ -832,7 +832,7 @@ function MessageBubble({
           "max-w-[78%] sm:max-w-[75%] min-w-0 px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm break-words [overflow-wrap:anywhere]",
           isOwn
             ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-br-lg"
-            : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-lg border border-gray-100 dark:border-gray-700"
+            : "bg-[#1e1e3a] text-slate-100 rounded-bl-lg border border-white/[0.08]"
         )}
         style={isOwn && accent ? { backgroundImage: `linear-gradient(90deg, ${accent.from}, ${accent.to})` } : undefined}
       >
@@ -843,7 +843,7 @@ function MessageBubble({
         )}
         {renderContent()}
         <div className={cn("flex items-center gap-1 mt-1", isOwn ? "justify-end" : "justify-start")}>
-          <span className={`text-[10px] ${isOwn ? "text-white/70" : "text-gray-400 dark:text-gray-500"}`}>
+          <span className={`text-[10px] ${isOwn ? "text-white/70" : "text-gray-400 text-slate-500"}`}>
             {new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
           {isOwn && (
@@ -1406,12 +1406,12 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
   // ─── CAMPUS AI CHAT VIEW ───
   if (selectedChat === CAMPUS_AI_ID) {
     return (
-      <div className="flex flex-col h-screen max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-none sm:rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-hidden relative" style={{ height: "100dvh" }}>
+      <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#13132a] rounded-none sm:rounded-2xl border border-white/[0.07] shadow-sm overflow-hidden overflow-x-hidden relative" style={{ height: "100dvh" }}>
         {/* AI Header */}
-        <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-pink-500/10 shrink-0">
+        <div className="flex items-center justify-between p-3 border-b border-white/[0.07] bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-pink-500/10 shrink-0">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSelectedChat(null)} className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-              <ChevronLeft className="h-5 w-5 dark:text-white" />
+            <button onClick={() => setSelectedChat(null)} className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center">
+              <ChevronLeft className="h-5 w-5 text-white" />
             </button>
             <div className="relative">
               <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-pink-500 p-0.5 flex items-center justify-center shadow-md">
@@ -1419,11 +1419,11 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                   <Sparkles className="h-5 w-5 text-purple-300" />
                 </div>
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-gray-900 shadow-sm" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-[#13132a] shadow-sm" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h2 className="font-bold text-sm bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-300 dark:to-pink-300">
+                <h2 className="font-bold text-sm bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
                   Campus AI
                 </h2>
                 <VerifiedBadge className="scale-75" />
@@ -1448,7 +1448,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                 }
               }}
               title="Reset AI Chat Memory"
-              className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors"
+              className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center text-slate-400 transition-colors"
             >
               <Eraser className="h-4 w-4" />
             </button>
@@ -1456,7 +1456,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         </div>
 
         {/* AI Messages list */}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-gradient-to-b from-purple-50/20 via-indigo-50/10 to-transparent dark:from-purple-950/20 dark:via-indigo-950/10 dark:to-transparent">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-gradient-to-b from-purple-500/20 via-indigo-500/10 to-transparent dark:from-purple-950/20 dark:via-indigo-950/10 dark:to-transparent">
           {aiHistory.map((msg) => (
             <div
               key={msg.id}
@@ -1470,7 +1470,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <div className="p-4 rounded-2xl rounded-tl-sm bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900/40 shadow-sm text-sm text-gray-800 dark:text-gray-100 whitespace-pre-wrap leading-relaxed">
+                    <div className="p-4 rounded-2xl rounded-tl-sm bg-[#1e1e3a] border border-purple-500/25 shadow-sm text-sm text-slate-200 whitespace-pre-wrap leading-relaxed">
                       {msg.text}
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-gray-400 px-1">
@@ -1480,14 +1480,14 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                       <span>·</span>
                       <button
                         onClick={() => handleSpeakAI(msg.text)}
-                        className="hover:text-purple-600 dark:hover:text-purple-400 flex items-center gap-1 transition-colors"
+                        className="hover:text-purple-300 dark:hover:text-purple-400 flex items-center gap-1 transition-colors"
                       >
                         <Volume2 className="h-3 w-3" /> Listen
                       </button>
                       <span>·</span>
                       <button
                         onClick={() => handleCopyText(msg.text)}
-                        className="hover:text-purple-600 dark:hover:text-purple-400 flex items-center gap-1 transition-colors"
+                        className="hover:text-purple-300 dark:hover:text-purple-400 flex items-center gap-1 transition-colors"
                       >
                         <Copy className="h-3 w-3" /> Copy
                       </button>
@@ -1508,7 +1508,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
           ))}
 
           {isAITyping && (
-            <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400 p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/40 w-fit animate-pulse">
+            <div className="flex items-center gap-2 text-xs text-purple-300 p-3 rounded-2xl bg-purple-500/12 bg-purple-500/20 border border-purple-500/25 border-purple-500/30 w-fit animate-pulse">
               <Sparkles className="h-4 w-4 animate-spin text-purple-500" />
               <span>Campus AI is typing...</span>
             </div>
@@ -1517,13 +1517,13 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         </div>
 
         {/* Suggestion Chips */}
-        <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md overflow-x-auto flex gap-1.5 scrollbar-none shrink-0">
+        <div className="px-3 py-2 border-t border-white/[0.07] bg-[#0d0d1a]/85 backdrop-blur-md overflow-x-auto flex gap-1.5 scrollbar-none shrink-0">
           {AI_SUGGESTION_CHIPS.map((chip, idx) => (
             <button
               key={idx}
               onClick={() => handleAISend(chip.prompt)}
               disabled={isAITyping}
-              className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+              className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-purple-500/12 bg-purple-500/25 hover:bg-purple-500/15 hover:bg-purple-500/20 text-purple-300 border border-purple-500/25 dark:border-purple-800 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
             >
               {chip.label}
             </button>
@@ -1531,7 +1531,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         </div>
 
         {/* Input area */}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 relative shrink-0">
+        <div className="p-3 border-t border-white/[0.07] bg-[#13132a] relative shrink-0">
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -1540,7 +1540,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleAISend()}
               disabled={isAITyping}
-              className="flex-1 h-11 px-4 rounded-2xl bg-gray-100 dark:bg-gray-800 border-0 text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50"
+              className="flex-1 h-11 px-4 rounded-2xl bg-white/[0.05] border-0 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50"
             />
             <Button
               size="icon"
@@ -1560,7 +1560,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
   // ─── CHAT VIEW ───
   if (selectedConv) {
     return (
-      <div className="flex flex-col h-screen max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-none sm:rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-hidden relative" style={{ height: "100dvh" }}>
+      <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#13132a] rounded-none sm:rounded-2xl border border-white/[0.07] shadow-sm overflow-hidden overflow-x-hidden relative" style={{ height: "100dvh" }}>
         <AnimatePresence>{showCallDialog && (
           <CallDialog type={showCallDialog} otherUser={selectedConv.otherUser} onEnd={() => setShowCallDialog(null)} />
         )}</AnimatePresence>
@@ -1569,15 +1569,15 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         )}</AnimatePresence>
 
         {/* Chat header */}
-        <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <div className="flex items-center justify-between p-3 border-b border-white/[0.07] bg-[#13132a] shrink-0">
           <div className="flex items-center gap-3">
-            <button onClick={() => { setSelectedChat(null); setFallbackConv(null); closeComposePanels(); closeChatSearch(); }} className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-              <ChevronLeft className="h-5 w-5 dark:text-gray-400" />
+            <button onClick={() => { setSelectedChat(null); setFallbackConv(null); closeComposePanels(); closeChatSearch(); }} className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center">
+              <ChevronLeft className="h-5 w-5 text-slate-400" />
             </button>
             {selectedConv.isGroup ? (
               <div className="relative">
                 <Avatar name={selectedConv.otherUser.name} size="md" className="from-pink-500 to-orange-400" />
-                <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#1e1e3a] border border-white/[0.1] flex items-center justify-center">
                   <Users className="h-3 w-3 text-pink-500" />
                 </span>
               </div>
@@ -1585,7 +1585,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
               <Avatar name={selectedConv.otherUser.name} size="md" status={selectedConv.otherUser.status as any} showStatus />
             )}
             <div className="min-w-0">
-              <div className="font-semibold text-sm dark:text-white truncate flex items-center gap-1.5">
+              <div className="font-semibold text-sm text-white truncate flex items-center gap-1.5">
                 <span>{selectedConv.otherUser.name}</span>
                 {(selectedConv.otherUser as any)?.is_verified && (
                   <VerifiedBadge domain={(selectedConv.otherUser as any)?.university_domain} size="sm" />
@@ -1612,17 +1612,17 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
           <div className="flex items-center gap-1">
             {!selectedConv.isGroup && (
               <>
-                <button onClick={() => handleCall("voice")} className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center" title="Voice call">
-                  <Phone className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <button onClick={() => handleCall("voice")} className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center" title="Voice call">
+                  <Phone className="h-4 w-4 text-slate-400" />
                 </button>
-                <button onClick={() => handleCall("video")} className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center" title="Video call">
-                  <Video className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <button onClick={() => handleCall("video")} className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center" title="Video call">
+                  <Video className="h-4 w-4 text-slate-400" />
                 </button>
               </>
             )}
             <div className="relative" ref={chatSettingsRef}>
-              <button onClick={() => setShowChatSettings(!showChatSettings)} className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-                <MoreHorizontal className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <button onClick={() => setShowChatSettings(!showChatSettings)} className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center">
+                <MoreHorizontal className="h-4 w-4 text-slate-400" />
               </button>
               <AnimatePresence>{showChatSettings && (
                 <ChatSettings
@@ -1649,7 +1649,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
 
         {/* In-chat search */}
         {showChatSearch && (
-          <div className="px-3 pb-2 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+          <div className="px-3 pb-2 border-b border-white/[0.07] bg-[#13132a] shrink-0">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1659,10 +1659,10 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                   value={chatSearchQuery}
                   onChange={(e) => setChatSearchQuery(e.target.value)}
                   autoFocus
-                  className="w-full h-9 pl-9 pr-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-0 text-sm dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500/20"
+                  className="w-full h-9 pl-9 pr-3 rounded-xl bg-white/[0.05] border-0 text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-500/20"
                 />
               </div>
-              <button onClick={closeChatSearch} className="h-8 w-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
+              <button onClick={closeChatSearch} className="h-8 w-8 rounded-lg hover:bg-white/[0.07] flex items-center justify-center">
                 <X className="h-4 w-4 text-gray-400" />
               </button>
             </div>
@@ -1670,7 +1670,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
               {(["all", "media", "links"] as const).map((t) => (
                 <button key={t} onClick={() => setSearchTab(t)}
                   className={cn("px-3 py-1 rounded-lg text-xs transition-colors",
-                    searchTab === t ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400")}>
+                    searchTab === t ? "bg-purple-500/20 text-white" : "bg-white/[0.05] text-slate-400")}>
                   {t === "all" ? "All" : t === "media" ? "Media" : "Links"}
                 </button>
               ))}
@@ -1684,7 +1684,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         )}
 
         {/* Messages */}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-1 bg-gradient-to-b from-purple-50/30 to-transparent dark:from-purple-950/10 dark:to-transparent"
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-1 bg-gradient-to-b from-purple-500/30 to-transparent dark:from-purple-950/10 dark:to-transparent"
           style={currentThemeId !== "default" ? { backgroundImage: `linear-gradient(to bottom, ${currentTheme.soft}, transparent)` } : undefined}>
           {msgsLoading ? (
             <div className="flex items-center justify-center h-full"><Loader2 className="h-6 w-6 animate-spin text-purple-500" /></div>
@@ -1724,8 +1724,8 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
-                  {showChatSearch ? <Search className="h-8 w-8 text-gray-400 dark:text-gray-600" /> : <MessageCircle className="h-8 w-8 text-gray-400 dark:text-gray-600" />}
+                <div className="h-16 w-16 rounded-full bg-white/[0.05] flex items-center justify-center mx-auto mb-3">
+                  {showChatSearch ? <Search className="h-8 w-8 text-gray-400 text-slate-400" /> : <MessageCircle className="h-8 w-8 text-gray-400 text-slate-400" />}
                 </div>
                 <p className="text-sm text-muted-foreground">{showChatSearch ? "No results found" : "No messages yet. Say hello!"}</p>
               </div>
@@ -1735,7 +1735,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         </div>
 
         {/* Input area */}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 relative shrink-0">
+        <div className="p-3 border-t border-white/[0.07] bg-[#13132a] relative shrink-0">
           <AnimatePresence>
             {showEmoji && <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmoji(false)} />}
             {showAttach && <AttachmentPicker onSend={handleFileSend} onClose={() => setShowAttach(false)} />}
@@ -1745,8 +1745,8 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
 
           <div className="flex items-center gap-2">
             <button onClick={() => { setShowAttach(!showAttach); setShowEmoji(false); setShowVoice(false); setShowPoll(false); }}
-              className="h-10 w-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center flex-shrink-0">
-              <Paperclip className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              className="h-10 w-10 rounded-xl hover:bg-white/[0.07] flex items-center justify-center flex-shrink-0">
+              <Paperclip className="h-5 w-5 text-gray-400 text-slate-500" />
             </button>
             <div className="flex-1 relative min-w-0">
               <input
@@ -1754,20 +1754,20 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                className="w-full h-10 px-4 pr-10 rounded-xl bg-gray-100 dark:bg-gray-800 border-0 text-sm dark:text-gray-200 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:bg-white dark:focus:bg-gray-800 transition-all"
+                className="w-full h-10 px-4 pr-10 rounded-xl bg-white/[0.05] border-0 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:bg-white/[0.07] transition-all"
               />
               <button onClick={() => { setShowEmoji(!showEmoji); setShowAttach(false); setShowVoice(false); setShowPoll(false); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center">
-                <Smile className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-lg hover:bg-white/[0.1] hover:bg-white/[0.07] flex items-center justify-center">
+                <Smile className="h-4 w-4 text-gray-400 text-slate-500" />
               </button>
             </div>
             <button onClick={() => { setShowVoice(!showVoice); setShowEmoji(false); setShowAttach(false); setShowPoll(false); }}
-              className="h-10 w-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center flex-shrink-0">
-              <Mic className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              className="h-10 w-10 rounded-xl hover:bg-white/[0.07] flex items-center justify-center flex-shrink-0">
+              <Mic className="h-5 w-5 text-gray-400 text-slate-500" />
             </button>
             <button onClick={() => { setShowPoll(!showPoll); setShowEmoji(false); setShowAttach(false); setShowVoice(false); }}
-              className="h-10 w-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center flex-shrink-0">
-              <BarChart3 className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              className="h-10 w-10 rounded-xl hover:bg-white/[0.07] flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="h-5 w-5 text-gray-400 text-slate-500" />
             </button>
             <Button size="icon" variant="gradient" onClick={handleSend} disabled={!messageInput.trim()} className="h-10 w-10 flex-shrink-0">
               <Send className="h-4 w-4" />
@@ -1783,7 +1783,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
     <div className="max-w-2xl mx-auto">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold dark:text-white mb-1">Messages</h1>
+          <h1 className="text-xl font-bold text-white mb-1">Messages</h1>
           <p className="text-sm text-muted-foreground">Chat with your campus friends</p>
         </div>
         <div className="flex gap-2">
@@ -1802,11 +1802,11 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
             <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input type="text" placeholder="Group name (e.g. Study Group)" value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" />
+              className="w-full h-11 pl-10 pr-4 rounded-2xl bg-[#1e1e3a] border border-white/[0.1] text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" />
           </div>
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Select members ({groupMembers.length} selected)</p>
-            <button onClick={() => setShowNewGroup(false)} className="text-xs text-purple-500 hover:text-purple-600 font-medium">
+            <button onClick={() => setShowNewGroup(false)} className="text-xs text-purple-500 hover:text-purple-300 font-medium">
               Close
             </button>
           </div>
@@ -1820,17 +1820,17 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                   <div key={friend.id} onClick={() => toggleGroupMember(friend.id)}
                     className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all border ${
                       selected
-                        ? "bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-500/40"
-                        : "hover:bg-white dark:hover:bg-gray-800/50 border-transparent"
+                        ? "bg-purple-500/12 bg-purple-500/20 border-purple-500/25 border-purple-500/30"
+                        : "hover:bg-white/[0.06] border-transparent"
                     }`}>
                     <div className={`h-5 w-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                      selected ? "bg-purple-500 border-purple-500" : "border-gray-300 dark:border-gray-600"
+                      selected ? "bg-purple-500/20 border-purple-500" : "border-white/[0.14] border-white/[0.12]"
                     }`}>
                       {selected && <Check className="h-3 w-3 text-white" />}
                     </div>
                     <Avatar name={friend.name} size="md" status={friend.status} showStatus />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm dark:text-white truncate">{friend.name}</div>
+                      <div className="font-medium text-sm text-white truncate">{friend.name}</div>
                       <div className="text-xs text-muted-foreground">{friend.department ?? ""}</div>
                     </div>
                   </div>
@@ -1838,7 +1838,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
               })
             ) : (
               <div className="text-center py-6">
-                <Users className="h-8 w-8 text-gray-300 dark:text-gray-700 mx-auto mb-2" />
+                <Users className="h-8 w-8 text-gray-300 text-slate-300 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground">Add friends first to create a group!</p>
               </div>
             )}
@@ -1860,7 +1860,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input type="text" placeholder="Search friends to message..." value={friendSearch}
               onChange={(e) => setFriendSearch(e.target.value)}
-              className="w-full h-11 pl-10 pr-10 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" autoFocus />
+              className="w-full h-11 pl-10 pr-10 rounded-2xl bg-[#1e1e3a] border border-white/[0.1] text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" autoFocus />
             <button onClick={() => setShowNewChat(false)} className="absolute right-3 top-1/2 -translate-y-1/2">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -1871,10 +1871,10 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
             ) : filteredFriends.length > 0 ? (
               filteredFriends.map((friend) => (
                 <div key={friend.id} onClick={() => handleStartNewChat(friend.id)}
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white dark:hover:bg-gray-800/50 cursor-pointer transition-all">
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.06] cursor-pointer transition-all">
                   <Avatar name={friend.name} size="md" status={friend.status} showStatus />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm dark:text-white">{friend.name}</div>
+                    <div className="font-medium text-sm text-white">{friend.name}</div>
                     <div className="text-xs text-muted-foreground">{friend.department ?? ""}</div>
                   </div>
                   <MessageCircle className="h-4 w-4 text-purple-400" />
@@ -1882,7 +1882,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
               ))
             ) : (
               <div className="text-center py-6">
-                <UserPlus className="h-8 w-8 text-gray-300 dark:text-gray-700 mx-auto mb-2" />
+                <UserPlus className="h-8 w-8 text-gray-300 text-slate-300 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground">{friendSearch ? "No friends match your search" : "Add friends first to message them!"}</p>
               </div>
             )}
@@ -1894,7 +1894,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input type="text" placeholder="Search conversations..." value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-11 pl-10 pr-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" />
+          className="w-full h-11 pl-10 pr-4 rounded-2xl bg-[#1e1e3a] border border-white/[0.1] text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" />
       </div>
 
       {/* ─── META AI BANNER & PINNED CAMPUS AI CONTACT ─── */}
@@ -1926,7 +1926,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
           className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all group border ${
             selectedChat === CAMPUS_AI_ID
               ? "bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-pink-500/10 border-purple-400 dark:border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.25)]"
-              : "bg-gradient-to-r from-purple-50/50 via-indigo-50/30 to-pink-50/50 dark:from-purple-950/20 dark:via-indigo-950/20 dark:to-pink-950/20 border-purple-200/60 dark:border-purple-800/40 hover:border-purple-400"
+              : "bg-gradient-to-r from-purple-500/40 via-indigo-500/30 to-pink-500/40 border-purple-500/60 border-purple-500/30 hover:border-purple-400"
           }`}
         >
           <div className="relative flex-shrink-0">
@@ -1935,21 +1935,21 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                 <Sparkles className="h-6 w-6 text-purple-300 animate-pulse" />
               </div>
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white dark:border-gray-900 shadow-sm" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-[#13132a] shadow-sm" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-300 dark:to-pink-300">
+                <span className="text-sm font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
                   Campus AI
                 </span>
                 <VerifiedBadge className="scale-75" />
               </div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-700">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 bg-purple-500/25 text-purple-300 border border-purple-500/25 border-purple-500/35">
                 AI Assistant
               </span>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-300 truncate mt-0.5 font-medium">
+            <p className="text-xs text-slate-300 truncate mt-0.5 font-medium">
               {aiHistory.length > 0
                 ? aiHistory[aiHistory.length - 1].text.replace(/[*_#`]/g, "").slice(0, 45) + "..."
                 : "Ask Campus AI for study help, note summaries & quizzes! ✨"}
@@ -1971,8 +1971,8 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                   onClick={() => setSelectedChat(conv.conversation.id)}
                   className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all group ${
                     isUnread
-                      ? "bg-purple-50/70 dark:bg-purple-950/40 ring-1 ring-purple-200 dark:ring-purple-500/30 shadow-[0_0_18px_rgba(168,85,247,0.25)]"
-                      : "hover:bg-white dark:hover:bg-gray-800/50"
+                      ? "bg-purple-500/20 bg-purple-500/20 ring-1 ring-purple-500/40 shadow-[0_0_18px_rgba(168,85,247,0.25)]"
+                      : "hover:bg-white/[0.06]"
                   }`}>
                   <div className="relative flex-shrink-0">
                     {isUnread && (
@@ -1982,7 +1982,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                       {conv.isGroup ? (
                         <div className="relative">
                           <Avatar name={conv.otherUser.name} size="lg" className="from-pink-500 to-orange-400" />
-                          <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                          <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#1e1e3a] border border-white/[0.1] flex items-center justify-center">
                             <Users className="h-3 w-3 text-pink-500" />
                           </span>
                         </div>
@@ -1993,7 +1993,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className={`text-sm truncate ${isUnread ? "font-bold text-purple-700 dark:text-purple-300" : "font-semibold dark:text-white"}`}>
+                      <span className={`text-sm truncate ${isUnread ? "font-bold text-purple-300" : "font-semibold text-white"}`}>
                         {conv.isGroup ? conv.otherUser.name : (nicknames[conv.otherUser.id] || conv.otherUser.name)}
                       </span>
                       <span className={`text-xs flex-shrink-0 ml-2 ${isUnread ? "font-semibold text-purple-500" : "text-muted-foreground"}`}>
@@ -2001,7 +2001,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
-                      <p className={`text-sm truncate ${isUnread ? "text-purple-600 dark:text-purple-400 font-medium" : "text-muted-foreground"}`}>
+                      <p className={`text-sm truncate ${isUnread ? "text-purple-300 font-medium" : "text-muted-foreground"}`}>
                         {previewFor(conv)}
                       </p>
                       <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -2012,7 +2012,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
                           <BellOff className="h-3.5 w-3.5 text-gray-400" />
                         )}
                         {isUnread && (
-                          <Badge variant="default" className="h-5 min-w-[20px] px-1.5 text-[10px] bg-purple-500 hover:bg-purple-500">
+                          <Badge variant="default" className="h-5 min-w-[20px] px-1.5 text-[10px] bg-purple-500/20 hover:bg-purple-500/20">
                             {conv.unreadCount}
                           </Badge>
                         )}
@@ -2024,7 +2024,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
             })
           ) : (
             <div className="text-center py-12">
-              <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
+              <MessageCircle className="h-10 w-10 text-gray-300 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">No conversations yet. Click "New Chat" to start messaging!</p>
             </div>
           )}

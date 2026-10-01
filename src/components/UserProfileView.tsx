@@ -114,15 +114,15 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
       className="fixed inset-0 z-[60] bg-white dark:bg-gray-950 overflow-y-auto"
     >
       {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
+      <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-white/[0.07]">
         <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 h-14">
           <button
             onClick={onBack}
-            className="h-9 w-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"
+            className="h-9 w-9 rounded-xl hover:bg-white/[0.07] flex items-center justify-center transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 dark:text-gray-400" />
+            <ChevronLeft className="h-5 w-5 text-slate-400" />
           </button>
-          <span className="font-semibold dark:text-white truncate">
+          <span className="font-semibold text-white truncate">
             {loading ? "Profile" : profile?.name || "Profile"}
           </span>
         </div>
@@ -161,26 +161,26 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
 
           {/* Name + status */}
           <div className="pt-20 px-5">
-            <h1 className="text-2xl font-bold dark:text-white">{profile.name}</h1>
+            <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
             <p className="text-sm text-muted-foreground capitalize mt-0.5">
               {profile.status || "offline"}
             </p>
 
             {/* Stats */}
-            <div className="flex gap-6 mt-3 py-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex gap-6 mt-3 py-3 border-t border-white/[0.07]">
               <div className="text-center">
-                <div className="font-bold text-lg dark:text-white">{postCount}</div>
+                <div className="font-bold text-lg">{postCount}</div>
                 <div className="text-xs text-muted-foreground">Posts</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg dark:text-white">{friendCount}</div>
+                <div className="font-bold text-lg">{friendCount}</div>
                 <div className="text-xs text-muted-foreground">Friends</div>
               </div>
             </div>
 
             {/* Bio */}
             {profile.bio ? (
-              <p className="text-sm text-gray-700 dark:text-gray-300 mt-3 leading-relaxed">
+              <p className="text-sm text-slate-300 mt-3 leading-relaxed">
                 {profile.bio}
               </p>
             ) : null}
@@ -198,14 +198,14 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] bg-[#1e1e3a]/50 border border-white/[0.08]"
                 >
                   <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0`}>
                     <item.icon className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs text-muted-foreground">{item.label}</div>
-                    <div className="text-sm font-medium truncate dark:text-white">{item.value}</div>
+                    <div className="text-sm font-medium truncate">{item.value}</div>
                   </div>
                 </motion.div>
               ))}
@@ -214,13 +214,13 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
             {/* Skills */}
             {skills.length > 0 && (
               <div className="mt-6">
-                <h3 className="flex items-center gap-1.5 font-semibold text-sm mb-2 dark:text-white">
+                <h3 className="flex items-center gap-1.5 font-semibold text-sm text-white mb-2">
                   <Sparkles className="h-4 w-4 text-purple-500" />
                   Skills
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill: string) => (
-                    <Badge key={skill} className="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 border-purple-100 dark:border-purple-800">
+                    <Badge key={skill} className="bg-purple-500/12 text-purple-300 bg-purple-500/15 text-purple-300 border-purple-500/25 dark:border-purple-800">
                       {skill}
                     </Badge>
                   ))}
@@ -230,26 +230,26 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
 
             {/* Posts */}
             <div className="mt-8">
-              <h3 className="flex items-center gap-1.5 font-semibold text-sm mb-3 dark:text-white">
+              <h3 className="flex items-center gap-1.5 font-semibold text-sm text-white mb-3">
                 <User className="h-4 w-4 text-pink-500" />
                 Posts
               </h3>
               {posts.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                <div className="p-8 text-center rounded-2xl bg-white/[0.03] bg-[#1e1e3a]/50 border border-white/[0.08]">
                   <p className="text-sm text-muted-foreground">No posts yet</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {posts.map((post) => (
-                    <div key={post.id} className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                      <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">{post.content}</p>
+                    <div key={post.id} className="p-4 rounded-2xl bg-white/[0.03] bg-[#1e1e3a]/50 border border-white/[0.08]">
+                      <p className="text-sm leading-relaxed text-slate-200">{post.content}</p>
                       {post.image_url && (
                         <img src={post.image_url} alt="Post" className="mt-3 rounded-xl w-full object-cover max-h-80" />
                       )}
                       {post.event_location && (
                         <p className="mt-2 text-xs text-muted-foreground">📍 {post.event_location}</p>
                       )}
-                      <div className="flex items-center gap-3 mt-3 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 mt-3 pt-2 border-t border-white/[0.07] text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Heart className="h-3.5 w-3.5 text-pink-400" />
                           {post.like_count}

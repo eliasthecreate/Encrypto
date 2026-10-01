@@ -13,13 +13,9 @@ import {
   Loader2,
   X,
   Crosshair,
-  Upload,
 } from "lucide-react";
 import { useFeedPosts, useStories } from "@/lib/supabase-hooks";
 import { Avatar } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader } from "./ui/card";
-import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { formatTimeAgo } from "@/lib/utils";
@@ -154,7 +150,7 @@ export function Feed() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
       </div>
     );
   }
@@ -170,170 +166,166 @@ export function Feed() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       {/* Post Composer */}
-      <Card className="overflow-hidden glass-card">
-        <CardContent className="p-4">
-          <div className="flex gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
-              {user?.name?.charAt(0) || "Y"}
-            </div>
-            <div className="flex-1">
-              <Textarea
-                placeholder="What's happening on campus?"
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                className="min-h-[60px] border-0 bg-gray-50 dark:bg-gray-800 rounded-xl resize-none text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                rows={2}
-              />
+      <div className="cc-card p-4">
+        <div className="flex gap-3">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+            {user?.name?.charAt(0) || "Y"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <Textarea
+              placeholder="What's happening on campus?"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              className="min-h-[60px] border-0 bg-white/[0.04] rounded-xl resize-none text-sm text-slate-100 placeholder:text-slate-500 focus:ring-0 focus:border-purple-500/40"
+              rows={2}
+            />
 
-              {shareLocation && locationName && (
-                <div className="mt-2 flex items-center gap-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg px-3 py-1.5 text-xs text-purple-700 dark:text-purple-300">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span className="font-medium truncate max-w-[200px]">{locationName}</span>
-                  <button
-                    onClick={() => { setShareLocation(false); setLocationName(null); }}
-                    className="ml-1 h-4 w-4 rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 flex items-center justify-center"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-
-              {postImagePreview && (
-                <div className="mt-2 relative">
-                  <img src={postImagePreview} alt="Preview" className="w-full h-40 object-cover rounded-xl" />
-                  <button
-                    onClick={() => { setPostImage(null); setPostImagePreview(null); }}
-                    className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-
-              {postType === "event" && (
-                <div className="mt-2 flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-orange-500" />
-                  <input
-                    type="datetime-local"
-                    value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
-                    className="flex-1 h-9 px-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs dark:text-gray-200 dark:[color-scheme:dark] focus:outline-none"
-                  />
-                </div>
-              )}
-
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                <div className="flex gap-1">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <button onClick={handleSelectImage} className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-purple-500 transition-all flex items-center gap-1.5 text-xs font-medium">
-                    <ImageIcon className="h-4 w-4" />
-                    {postImage ? "Change" : "Photo"}
-                  </button>
-                  <button onClick={handleSelectImage} className="h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-pink-500 transition-all flex items-center gap-1.5 text-xs font-medium">
-                    <Video className="h-4 w-4" />
-                    Video
-                  </button>
-                  <button
-                    onClick={handleEventClick}
-                    className={`h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-1.5 text-xs font-medium ${
-                      postType === "event"
-                        ? "bg-orange-50 dark:bg-orange-900/30 text-orange-500"
-                        : "text-gray-500 dark:text-gray-400 hover:text-orange-500"
-                    }`}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    {postType === "event" ? "Event" : "Event"}
-                  </button>
-                  <button
-                    onClick={handleToggleLocation}
-                    disabled={gettingLocation}
-                    className={`h-8 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-1.5 text-xs font-medium ${
-                      shareLocation
-                        ? "bg-purple-50 dark:bg-purple-900/30 text-purple-500"
-                        : "text-gray-500 dark:text-gray-400 hover:text-purple-500"
-                    }`}
-                  >
-                    {gettingLocation ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Crosshair className="h-4 w-4" />
-                    )}
-                    {shareLocation ? "Location On" : "Location"}
-                  </button>
-                </div>
-                <Button
-                  size="sm"
-                  variant="gradient"
-                  onClick={handlePost}
-                  disabled={!postContent.trim() || uploading}
-                  className="h-8"
+            {shareLocation && locationName && (
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-purple-500/12 rounded-lg pl-3 pr-1.5 py-1.5 text-xs text-purple-300">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="font-medium truncate max-w-[200px]">{locationName}</span>
+                <button
+                  onClick={() => { setShareLocation(false); setLocationName(null); }}
+                  aria-label="Remove location"
+                  className="h-4 w-4 rounded-full hover:bg-purple-500/25 flex items-center justify-center"
                 >
-                  {uploading ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Send className="h-3.5 w-3.5 mr-1.5" />
-                  )}
-                  {postType === "event" ? "Create Event" : "Post"}
-                </Button>
+                  <X className="h-3 w-3" />
+                </button>
               </div>
+            )}
+
+            {postImagePreview && (
+              <div className="mt-2 relative">
+                <img src={postImagePreview} alt="Preview" className="w-full h-40 object-cover rounded-xl" />
+                <button
+                  onClick={() => { setPostImage(null); setPostImagePreview(null); }}
+                  aria-label="Remove image"
+                  className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
+            {postType === "event" && (
+              <div className="mt-2 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-orange-400" />
+                <input
+                  type="datetime-local"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className="flex-1 h-9 px-3 rounded-lg bg-white/[0.04] border border-white/10 text-xs text-slate-200 [color-scheme:dark] focus:outline-none focus:border-orange-400/50"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-3 pt-3 cc-hairline">
+              <div className="flex gap-0.5 flex-wrap">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <button onClick={handleSelectImage} className="cc-tool hover:text-purple-300">
+                  <ImageIcon className="h-4 w-4" />
+                  {postImage ? "Change" : "Photo"}
+                </button>
+                <button onClick={handleSelectImage} className="cc-tool hover:text-pink-300">
+                  <Video className="h-4 w-4" />
+                  Video
+                </button>
+                <button
+                  onClick={handleEventClick}
+                  className={`cc-tool ${
+                    postType === "event"
+                      ? "!bg-orange-400/15 !text-orange-300"
+                      : "hover:text-orange-300"
+                  }`}
+                >
+                  <Calendar className="h-4 w-4" />
+                  Event
+                </button>
+                <button
+                  onClick={handleToggleLocation}
+                  disabled={gettingLocation}
+                  className={`cc-tool ${
+                    shareLocation
+                      ? "!bg-purple-500/15 !text-purple-300"
+                      : "hover:text-purple-300"
+                  }`}
+                >
+                  {gettingLocation ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Crosshair className="h-4 w-4" />
+                  )}
+                  {shareLocation ? "Location On" : "Location"}
+                </button>
+              </div>
+              <button
+                onClick={handlePost}
+                disabled={!postContent.trim() || uploading}
+                className="cc-gradient-btn h-8 px-4 text-xs flex items-center gap-1.5 flex-shrink-0"
+              >
+                {uploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
+                {postType === "event" ? "Create Event" : "Post"}
+              </button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Stories Bar */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        <div
+      <div className="cc-scroll-x flex gap-3 pb-1">
+        <button
           onClick={handleCreateStory}
-          className="flex flex-col items-center gap-1.5 min-w-[68px] cursor-pointer group"
+          className="flex flex-col items-center gap-1.5 min-w-[68px]"
         >
           <div className="relative">
-            <div className="h-16 w-16 rounded-full p-[2.5px] bg-gradient-to-tr from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700">
-              <div className="h-full w-full rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-gray-900">
+            <div className="h-16 w-16 rounded-full p-[2px] bg-white/10">
+              <div className="h-full w-full rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-lg">
                 {user?.name?.charAt(0) || "Y"}
               </div>
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 h-5 w-5 bg-purple-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-sm">
+            <div className="absolute -bottom-0.5 -right-0.5 h-5 w-5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full ring-2 ring-[#0d0d1a] flex items-center justify-center shadow-lg shadow-purple-900/60">
               <span className="text-white text-xs leading-none">+</span>
             </div>
           </div>
-          <span className="text-[10px] text-gray-600 dark:text-gray-400 font-medium truncate max-w-[68px]">
+          <span className="text-[10px] text-slate-400 font-medium truncate max-w-[68px]">
             Your Story
           </span>
-        </div>
+        </button>
 
         {uniqueStories.map((story: any) => {
           const storyUser = story.user || {};
           return (
-            <div
+            <button
               key={story.id}
-              className="flex flex-col items-center gap-1.5 min-w-[68px] cursor-pointer group"
+              className="flex flex-col items-center gap-1.5 min-w-[68px]"
             >
-              <div className="relative">
-                <div className="h-16 w-16 rounded-full p-[2.5px] bg-gradient-to-tr from-purple-400 via-pink-400 to-orange-400">
-                  {storyUser.avatar_url ? (
-                    <img
-                      src={storyUser.avatar_url}
-                      alt={storyUser.name || "Story"}
-                      className="h-full w-full rounded-full object-cover border-2 border-white dark:border-gray-900"
-                    />
-                  ) : (
-                    <div className="h-full w-full rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-gray-900">
-                      {(storyUser.name || "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
+              <div className="cc-story-ring h-16 w-16 rounded-full p-[2.5px]">
+                {storyUser.avatar_url ? (
+                  <img
+                    src={storyUser.avatar_url}
+                    alt={storyUser.name || "Story"}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-lg">
+                    {(storyUser.name || "?").charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
-              <span className="text-[10px] text-gray-600 dark:text-gray-400 font-medium truncate max-w-[68px]">
+              <span className="text-[10px] text-slate-400 font-medium truncate max-w-[68px]">
                 {storyUser.name || "Unknown"}
               </span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -341,11 +333,11 @@ export function Feed() {
       {/* Feed Posts */}
       {posts.length === 0 ? (
         <div className="text-center py-16">
-          <div className="h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-            <MessageCircle className="h-8 w-8 text-gray-400 dark:text-gray-600" />
+          <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+            <MessageCircle className="h-8 w-8 text-slate-600" />
           </div>
-          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">No posts yet</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-semibold text-slate-200 mb-1">No posts yet</h3>
+          <p className="text-sm text-slate-500">
             Be the first to share something with your campus!
           </p>
         </div>
@@ -357,65 +349,72 @@ export function Feed() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
           >
-            <Card className="overflow-hidden glass-card">
-              <CardHeader className="pb-3">
+            <div className="cc-card cc-card-hover overflow-hidden">
+              <div className="p-4 pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <Avatar
                       name={post.profiles?.name ?? "Unknown"}
+                      src={post.profiles?.avatar_url ?? undefined}
                       size="lg"
                       status={post.profiles?.status ?? "offline"}
                       showStatus
                     />
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm hover:text-purple-500 cursor-pointer dark:text-white flex items-center gap-1.5">
+                        <span className="font-semibold text-sm text-white hover:text-purple-300 cursor-pointer transition-colors flex items-center gap-1.5 truncate">
                           <span>{post.profiles?.name ?? "Unknown"}</span>
                           {(post.profiles as any)?.is_verified && (
                             <VerifiedBadge domain={(post.profiles as any)?.university_domain} size="sm" />
                           )}
                         </span>
                         {post.type !== "post" && (
-                          <Badge
-                            variant={post.type === "event" ? "warning" : "default"}
-                            className="text-[10px] px-1.5 py-0"
+                          <span
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                              post.type === "event"
+                                ? "bg-orange-400/15 text-orange-300"
+                                : "bg-purple-500/15 text-purple-300"
+                            }`}
                           >
                             {post.type === "event" ? "Event" : "Announcement"}
-                          </Badge>
+                          </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
+                        <span className="truncate">
                           {post.profiles?.department ?? ""} ·{" "}
                           {post.profiles?.year ?? ""}
                         </span>
                         <span>·</span>
-                        <span>{formatTimeAgo(new Date(post.created_at))}</span>
+                        <span className="flex-shrink-0">{formatTimeAgo(new Date(post.created_at))}</span>
                       </div>
                     </div>
                   </div>
-                  <button className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors">
-                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                  <button
+                    aria-label="Post options"
+                    className="h-8 w-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0"
+                  >
+                    <MoreHorizontal className="h-4 w-4 text-slate-500" />
                   </button>
                 </div>
-              </CardHeader>
+              </div>
 
-              <CardContent>
-                <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">
+              <div className="px-4 pb-4">
+                <p className="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap break-words">
                   {post.content}
                 </p>
 
                 {post.event_location && (
-                  <div className="mt-3 flex items-center gap-2 bg-purple-50 dark:bg-purple-900/30 rounded-xl px-3 py-2">
-                    <MapPin className="h-4 w-4 text-purple-500" />
-                    <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                  <div className="mt-3 flex items-center gap-2 bg-purple-500/12 rounded-xl px-3 py-2">
+                    <MapPin className="h-4 w-4 text-purple-400" />
+                    <span className="text-xs font-medium text-purple-300 truncate">
                       {post.event_location}
                     </span>
                   </div>
                 )}
 
-                <div className="mt-4 pt-3 border-t border-gray-50 dark:border-gray-800">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 px-1">
+                <div className="mt-4 pt-3 cc-hairline">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1 px-1">
                     <span className="flex items-center gap-1">
                       <Heart className="h-3.5 w-3.5 text-pink-400" />
                       {post.like_count ?? 0} likes
@@ -424,28 +423,24 @@ export function Feed() {
                       {post.comment_count ?? 0} comments · 0 shares
                     </span>
                   </div>
-                  <div className="flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-2">
+                  <div className="flex items-center justify-between pt-1">
                     <button
                       onClick={() => handleLike(post.id)}
-                      className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                        post.is_liked_by_me
-                          ? "text-pink-500 bg-pink-50 dark:bg-pink-900/20"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }`}
+                      className={`cc-action ${post.is_liked_by_me ? "cc-action-liked" : ""}`}
                     >
                       <Heart className={`h-4 w-4 ${post.is_liked_by_me ? "fill-current" : ""}`} />
                       Like
                     </button>
                     <button
                       onClick={() => handleComment(post.id)}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      className="cc-action hover:text-purple-300"
                     >
                       <MessageCircle className="h-4 w-4" />
                       Comment
                     </button>
                     <button
                       onClick={() => handleShare(post.id)}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      className="cc-action hover:text-cyan-300"
                     >
                       <Share2 className="h-4 w-4" />
                       Share
@@ -456,7 +451,7 @@ export function Feed() {
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800"
+                      className="mt-3 pt-3 cc-hairline"
                     >
                       <div className="flex items-center gap-2">
                         <Input
@@ -471,24 +466,23 @@ export function Feed() {
                           onKeyDown={(e) => {
                             if (e.key === "Enter") handleSubmitComment(post.id);
                           }}
-                          className="h-9 text-sm"
+                          className="cc-input h-9 text-sm"
                           autoFocus
                         />
-                        <Button
-                          size="sm"
-                          variant="gradient"
+                        <button
                           onClick={() => handleSubmitComment(post.id)}
                           disabled={!commentInputs[post.id]?.trim()}
-                          className="h-9"
+                          aria-label="Send comment"
+                          className="cc-gradient-btn h-9 w-9 flex items-center justify-center flex-shrink-0"
                         >
                           <Send className="h-3.5 w-3.5" />
-                        </Button>
+                        </button>
                       </div>
                     </motion.div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         ))
       )}

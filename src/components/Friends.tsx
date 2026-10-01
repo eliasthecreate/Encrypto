@@ -12,9 +12,6 @@ import {
 } from "lucide-react";
 import { useFriendRequests, useFriends, useStudentSuggestions } from "@/lib/supabase-hooks";
 import { Avatar } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader } from "./ui/card";
-import { Badge } from "./ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 
 import { VerifiedBadge } from "./VerifiedBadge";
@@ -50,15 +47,15 @@ export function Friends() {
       key={student.id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white dark:hover:bg-gray-800/50 cursor-pointer transition-all border border-transparent hover:border-gray-100 dark:hover:border-gray-700 hover:shadow-sm"
+      className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/[0.05] cursor-pointer transition-all border border-transparent hover:border-white/[0.07]"
     >
       <Avatar name={student.name} size="lg" status={student.status as any} showStatus />
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm dark:text-white flex items-center gap-1.5">
+        <div className="font-semibold text-sm text-white flex items-center gap-1.5">
           <span>{student.name}</span>
           {student.is_verified && <VerifiedBadge domain={student.university_domain} size="sm" />}
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+        <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
           <span>{student.department ?? ""}</span>
           {student.department && <span>·</span>}
           <span>{student.year ?? ""}</span>
@@ -66,22 +63,25 @@ export function Friends() {
       </div>
       {showAddButton && (
         pendingSends.has(student.id) ? (
-          <Button size="sm" variant="outline" className="text-purple-500 border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 cursor-default h-8">
-            <Clock className="h-3.5 w-3.5 mr-1" />
+          <span className="h-8 px-3 rounded-md border border-purple-500/25 bg-purple-500/12 text-purple-300 text-xs font-medium flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
             Pending
-          </Button>
+          </span>
         ) : (
-          <Button size="sm" variant="gradient" onClick={() => handleAddFriend(student.id)} className="h-8">
-            <UserPlus className="h-3.5 w-3.5 mr-1" />
+          <button
+            onClick={() => handleAddFriend(student.id)}
+            className="cc-gradient-btn h-8 px-3.5 text-xs flex items-center gap-1"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
             Add
-          </Button>
+          </button>
         )
       )}
       {showMessageButton && (
-        <Button size="sm" variant="outline" className="h-8">
-          <MessageCircle className="h-3.5 w-3.5 mr-1" />
+        <span className="h-8 px-3.5 rounded-md border border-white/10 bg-white/5 text-slate-300 text-xs font-medium flex items-center gap-1">
+          <MessageCircle className="h-3.5 w-3.5" />
           Message
-        </Button>
+        </span>
       )}
     </motion.div>
   );
@@ -89,62 +89,68 @@ export function Friends() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-4">
-        <h1 className="text-xl font-bold dark:text-white mb-1">Friends</h1>
-        <p className="text-sm text-muted-foreground">Connect with your campus community</p>
+        <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Explore</h1>
+        <p className="text-sm text-slate-400">Find and connect with ICU students</p>
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input
           type="text"
           placeholder="Search students..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-11 pl-10 pr-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+          className="cc-input w-full h-11 pl-10 pr-4"
         />
       </div>
 
       {reqsLoading ? (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-purple-500" />
+          <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
         </div>
       ) : requests.length > 0 ? (
-        <Card className="mb-4 border-pink-200 dark:border-pink-900 bg-pink-50/30 dark:bg-pink-950/20">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-              <span className="font-semibold text-sm text-pink-800 dark:text-pink-300">
-                Friend Requests
-              </span>
-              <Badge variant="warning" className="ml-auto">{requests.length} new</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {requests.map((request) => (
-                <div key={request.id} className="flex items-center gap-3 p-2 rounded-xl bg-white dark:bg-gray-800 border border-pink-100 dark:border-pink-900">
-                  <Avatar name={request.sender?.name ?? "Unknown"} size="md" status={request.sender?.status ?? "offline" as any} showStatus />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm dark:text-white">{request.sender?.name ?? "Unknown"}</div>
-                    <div className="text-xs text-muted-foreground">{request.sender?.department ?? ""}</div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="gradient" onClick={() => acceptRequest(request.id)} className="h-8 w-8 p-0">
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => rejectRequest(request.id)} className="h-8 w-8 p-0 text-red-500 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/30">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
+        <div className="cc-card mb-4 border-pink-500/25 bg-pink-500/[0.07] p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <UserPlus className="h-4 w-4 text-pink-400" />
+            <span className="font-semibold text-sm text-pink-200">
+              Friend Requests
+            </span>
+            <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-200">
+              {requests.length} new
+            </span>
+          </div>
+          <div className="space-y-2">
+            {requests.map((request) => (
+              <div key={request.id} className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                <Avatar name={request.sender?.name ?? "Unknown"} size="md" status={request.sender?.status ?? "offline" as any} showStatus />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm text-white">{request.sender?.name ?? "Unknown"}</div>
+                  <div className="text-xs text-slate-400">{request.sender?.department ?? ""}</div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => acceptRequest(request.id)}
+                    aria-label="Accept request"
+                    className="cc-gradient-btn h-8 w-8 p-0 flex items-center justify-center"
+                  >
+                    <Check className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => rejectRequest(request.id)}
+                    aria-label="Decline request"
+                    className="h-8 w-8 p-0 rounded-md border border-white/10 bg-white/5 text-slate-400 hover:text-rose-300 hover:border-rose-500/40 hover:bg-rose-500/12 transition-colors flex items-center justify-center"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full bg-gray-100/50 dark:bg-gray-800/50 mb-4">
+        <TabsList className="w-full bg-white/[0.04] mb-4 text-slate-400">
           <TabsTrigger value="suggestions" className="flex-1">Suggestions</TabsTrigger>
           <TabsTrigger value="friends" className="flex-1">Friends ({friends.length})</TabsTrigger>
         </TabsList>
@@ -152,7 +158,7 @@ export function Friends() {
         <TabsContent value="suggestions">
           {suggestionsLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
             </div>
           ) : (
             <div className="space-y-1">
@@ -160,8 +166,8 @@ export function Friends() {
                 filteredSuggestions.map((s) => renderStudentCard(s, true))
               ) : (
                 <div className="text-center py-12">
-                  <Users className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-700 mb-3" />
-                  <p className="text-sm text-muted-foreground">No suggestions found</p>
+                  <Users className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+                  <p className="text-sm text-slate-400">No suggestions found</p>
                 </div>
               )}
             </div>
@@ -171,7 +177,7 @@ export function Friends() {
         <TabsContent value="friends">
           {friendsLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
             </div>
           ) : (
             <div className="space-y-1">
@@ -179,8 +185,8 @@ export function Friends() {
                 filteredFriends.map((f) => renderStudentCard(f, false, true))
               ) : (
                 <div className="text-center py-12">
-                  <Users className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-700 mb-3" />
-                  <p className="text-sm text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+                  <p className="text-sm text-slate-400">
                     {searchQuery ? "No friends match your search" : "No friends yet. Start connecting!"}
                   </p>
                 </div>

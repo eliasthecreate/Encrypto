@@ -112,19 +112,20 @@ export function Profile() {
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
 
       {/* ─── Cover Photo ─── */}
-      <div className="relative h-48 sm:h-64 rounded-b-2xl overflow-hidden bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400">
+      <div className="relative h-48 sm:h-64 rounded-b-2xl overflow-hidden bg-gradient-to-br from-[#2a1145] via-purple-700 to-pink-600">
+        <div className="absolute inset-0 bg-grid opacity-40" />
         {p?.cover_url && (
           <img src={p.cover_url} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d1a] via-transparent to-transparent" />
 
         {/* Edit cover button */}
         <div
           onClick={() => coverInputRef.current?.click()}
-          className="absolute bottom-3 right-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors"
+          className="absolute bottom-3 right-3 bg-[#13132a]/80 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg border border-white/10 flex items-center gap-2 cursor-pointer hover:bg-[#1e1e3a] transition-colors"
         >
           <Camera className="h-4 w-4 text-purple-500" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+          <span className="text-sm font-medium text-slate-200">
             {uploadingCover ? "Uploading..." : "Edit cover photo"}
           </span>
           {uploadingCover && <Loader2 className="h-4 w-4 animate-spin text-purple-500" />}
@@ -133,7 +134,7 @@ export function Profile() {
         {/* Profile picture overlapping cover */}
         <div className="absolute -bottom-14 left-6">
           <div className="relative group">
-            <div className="h-28 w-28 rounded-full border-4 border-white dark:border-gray-900 shadow-xl overflow-hidden">
+            <div className="h-28 w-28 rounded-full border-4 border-[#13132a] shadow-xl overflow-hidden">
               {p?.avatar_url ? (
                 <img src={p.avatar_url} alt={displayName} className="h-full w-full object-cover" />
               ) : (
@@ -163,7 +164,7 @@ export function Profile() {
       <div className="px-6 pt-16 pb-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold dark:text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>{displayName}</span>
               {p?.is_verified && <VerifiedBadge domain={p.university_domain} size="md" />}
               {pronounsText && (
@@ -179,7 +180,7 @@ export function Profile() {
 
             {/* Stats */}
             <div className="flex items-center gap-2 mt-1.5 text-sm text-muted-foreground">
-              <span className="font-medium text-gray-700 dark:text-gray-300">
+              <span className="font-medium text-slate-300">
                 {statsLoading ? "..." : friendCount} friends
               </span>
               <span>·</span>
@@ -208,7 +209,7 @@ export function Profile() {
                     href={`https://instagram.com/${p.instagram.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-purple-500 hover:text-purple-600"
+                    className="flex items-center gap-1 text-sm text-purple-500 hover:text-purple-300"
                   >
                     <Instagram className="h-3.5 w-3.5" />
                     {p.instagram}
@@ -219,7 +220,7 @@ export function Profile() {
                     href={`https://twitter.com/${p.twitter.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600"
+                    className="flex items-center gap-1 text-sm text-blue-500 hover:text-sky-400"
                   >
                     <Twitter className="h-3.5 w-3.5" />
                     {p.twitter}
@@ -230,7 +231,7 @@ export function Profile() {
                     href={p.website.startsWith("http") ? p.website : `https://${p.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-green-500 hover:text-green-600"
+                    className="flex items-center gap-1 text-sm text-green-500 hover:text-emerald-400"
                   >
                     <Globe className="h-3.5 w-3.5" />
                     {p.website}
@@ -263,9 +264,9 @@ export function Profile() {
       </div>
 
       {/* ─── Tabs ─── */}
-      <div className="border-t border-gray-100 dark:border-gray-800">
+      <div className="border-t border-white/[0.07]">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full bg-transparent border-b border-gray-100 dark:border-gray-800 rounded-none h-auto p-0">
+          <TabsList className="w-full bg-transparent border-b border-white/[0.07] rounded-none h-auto p-0">
             {[
               { value: "all", label: "All" },
               { value: "about", label: "About" },
@@ -275,7 +276,7 @@ export function Profile() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-purple-600 data-[state=active]:shadow-none py-3 text-sm font-medium"
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-purple-300 data-[state=active]:shadow-none py-3 text-sm font-medium"
               >
                 {tab.label}
               </TabsTrigger>
@@ -287,7 +288,7 @@ export function Profile() {
             {/* Bio */}
             {(p?.bio || "") && (
               <div className="px-6 py-4">
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{p.bio}</p>
+                <p className="text-sm text-slate-300 leading-relaxed">{p.bio}</p>
               </div>
             )}
 
@@ -302,17 +303,17 @@ export function Profile() {
             {/* Posts */}
             <div className="px-6 py-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-base dark:text-white">Posts</h3>
-                <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
+                <h3 className="font-semibold text-base text-white">Posts</h3>
+                <div className="flex items-center gap-1 bg-white/[0.05] rounded-lg p-0.5">
                   <button
                     onClick={() => setPostViewMode("list")}
-                    className={`p-1.5 rounded-md transition-colors ${postViewMode === "list" ? "bg-white dark:bg-gray-700 shadow-sm text-purple-500" : "text-gray-400 hover:text-gray-600"}`}
+                    className={`p-1.5 rounded-md transition-colors ${postViewMode === "list" ? "bg-white bg-[#26264a] shadow-sm text-purple-500" : "text-gray-400 hover:text-slate-300"}`}
                   >
                     <List className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setPostViewMode("grid")}
-                    className={`p-1.5 rounded-md transition-colors ${postViewMode === "grid" ? "bg-white dark:bg-gray-700 shadow-sm text-purple-500" : "text-gray-400 hover:text-gray-600"}`}
+                    className={`p-1.5 rounded-md transition-colors ${postViewMode === "grid" ? "bg-white bg-[#26264a] shadow-sm text-purple-500" : "text-gray-400 hover:text-slate-300"}`}
                   >
                     <LayoutGrid className="h-4 w-4" />
                   </button>
@@ -326,8 +327,8 @@ export function Profile() {
               ) : userPosts.length === 0 ? (
                 <Card className="glass-card">
                   <CardContent className="p-8 text-center">
-                    <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
-                      <MessageCircle className="h-6 w-6 text-gray-400 dark:text-gray-600" />
+                    <div className="h-12 w-12 rounded-full bg-white/[0.05] flex items-center justify-center mx-auto mb-3">
+                      <MessageCircle className="h-6 w-6 text-gray-400 text-slate-500" />
                     </div>
                     <p className="text-sm text-muted-foreground">No posts yet</p>
                     <p className="text-xs text-muted-foreground mt-1">Go to the Home feed to create your first post!</p>
@@ -336,7 +337,7 @@ export function Profile() {
               ) : postViewMode === "grid" ? (
                 <div className="grid grid-cols-3 gap-1">
                   {userPosts.filter((po) => po.image_url).map((post) => (
-                    <div key={post.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div key={post.id} className="aspect-square rounded-lg overflow-hidden bg-white/[0.05]">
                       <img src={post.image_url!} alt="" className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -361,15 +362,15 @@ export function Profile() {
 
           {/* ─── PHOTOS TAB ─── */}
           <TabsContent value="photos" className="px-6 py-4">
-            <h3 className="font-semibold text-base dark:text-white mb-3">Photos</h3>
+            <h3 className="font-semibold text-base text-white mb-3">Photos</h3>
             {(() => {
               const photoPosts = userPosts.filter((po) => po.image_url);
               if (photoPosts.length === 0) {
                 return (
                   <Card className="glass-card">
                     <CardContent className="p-8 text-center">
-                      <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
-                        <ImageIcon className="h-6 w-6 text-gray-400 dark:text-gray-600" />
+                      <div className="h-12 w-12 rounded-full bg-white/[0.05] flex items-center justify-center mx-auto mb-3">
+                        <ImageIcon className="h-6 w-6 text-gray-400 text-slate-500" />
                       </div>
                       <p className="text-sm text-muted-foreground">No photos yet</p>
                       <p className="text-xs text-muted-foreground mt-1">Photos you share in posts will appear here</p>
@@ -380,7 +381,7 @@ export function Profile() {
               return (
                 <div className="grid grid-cols-3 gap-1">
                   {photoPosts.map((post) => (
-                    <div key={post.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div key={post.id} className="aspect-square rounded-lg overflow-hidden bg-white/[0.05]">
                       <img src={post.image_url!} alt="" className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -411,11 +412,11 @@ function PostCard({ post, profileName, avatarUrl }: { post: any; profileName: st
         <div className="flex items-start gap-3 mb-2">
           <Avatar name={profileName} size="md" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium dark:text-white">{profileName}</p>
+            <p className="text-sm font-medium text-white">{profileName}</p>
             <p className="text-[11px] text-muted-foreground">{formatTimeAgo(new Date(post.created_at))}</p>
           </div>
         </div>
-        <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200 mb-2">{post.content}</p>
+        <p className="text-sm leading-relaxed text-slate-200 mb-2">{post.content}</p>
         {post.image_url && (
           <img src={post.image_url} alt="" className="rounded-lg w-full max-h-80 object-cover mb-2" />
         )}
@@ -425,7 +426,7 @@ function PostCard({ post, profileName, avatarUrl }: { post: any; profileName: st
             <span>{post.event_location}</span>
           </div>
         )}
-        <div className="flex items-center gap-3 pt-2 border-t border-gray-50 dark:border-gray-800 text-xs text-muted-foreground">
+        <div className="flex items-center gap-3 pt-2 border-t border-white/[0.07] text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Heart className="h-3.5 w-3.5 text-pink-400" />
             {post.like_count}
@@ -446,20 +447,20 @@ function FriendsSection({ friends, loading, friendCount, onSeeAll }: { friends: 
   if (friendCount === 0) return null;
 
   return (
-    <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800">
+    <div className="px-6 py-4 border-t border-white/[0.07]">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="font-semibold text-base dark:text-white">Friends</h3>
+          <h3 className="font-semibold text-base text-white">Friends</h3>
           <p className="text-sm text-muted-foreground">{friendCount.toLocaleString()} friends</p>
         </div>
-        <button onClick={onSeeAll} className="text-sm text-purple-500 hover:text-purple-600 font-medium">
+        <button onClick={onSeeAll} className="text-sm text-purple-500 hover:text-purple-300 font-medium">
           See all friends
         </button>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {friends.slice(0, 6).map((friend: any) => (
           <div key={friend.id} className="text-center">
-            <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 mb-1.5">
+            <div className="aspect-square rounded-xl overflow-hidden bg-white/[0.05] mb-1.5">
               {friend.avatar_url ? (
                 <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
               ) : (
@@ -468,7 +469,7 @@ function FriendsSection({ friends, loading, friendCount, onSeeAll }: { friends: 
                 </div>
               )}
             </div>
-            <p className="text-xs font-medium truncate dark:text-white">{friend.name}</p>
+            <p className="text-xs font-medium text-white truncate">{friend.name}</p>
           </div>
         ))}
       </div>
@@ -490,15 +491,15 @@ function FriendsFullSection({ friends, loading, friendCount }: { friends: any[];
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-base dark:text-white">Friends</h3>
+          <h3 className="font-semibold text-base text-white">Friends</h3>
           <p className="text-sm text-muted-foreground">{friendCount.toLocaleString()} friends</p>
         </div>
       </div>
       {friends.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="p-8 text-center">
-            <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
-              <Users className="h-6 w-6 text-gray-400 dark:text-gray-600" />
+            <div className="h-12 w-12 rounded-full bg-white/[0.05] flex items-center justify-center mx-auto mb-3">
+              <Users className="h-6 w-6 text-gray-400 text-slate-500" />
             </div>
             <p className="text-sm text-muted-foreground">No friends yet</p>
             <p className="text-xs text-muted-foreground mt-1">Connect with your campus mates!</p>
@@ -508,7 +509,7 @@ function FriendsFullSection({ friends, loading, friendCount }: { friends: any[];
         <div className="grid grid-cols-3 gap-3">
           {friends.map((friend: any) => (
             <div key={friend.id} className="text-center">
-              <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 mb-1.5">
+              <div className="aspect-square rounded-xl overflow-hidden bg-white/[0.05] mb-1.5">
                 {friend.avatar_url ? (
                   <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
                 ) : (
@@ -517,7 +518,7 @@ function FriendsFullSection({ friends, loading, friendCount }: { friends: any[];
                   </div>
                 )}
               </div>
-              <p className="text-xs font-medium truncate dark:text-white">{friend.name}</p>
+              <p className="text-xs font-medium text-white truncate">{friend.name}</p>
               {friend.department && (
                 <p className="text-[10px] text-muted-foreground truncate">{friend.department}</p>
               )}
@@ -536,37 +537,37 @@ function AboutSection({ profile: p }: { profile: any }) {
       {/* Personal Details */}
       <div className="glass-card rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-base dark:text-white">Personal Details</h3>
+          <h3 className="font-semibold text-base text-white">Personal Details</h3>
         </div>
         <div className="space-y-3">
           {p?.pronouns && (
             <div className="flex items-center gap-3 text-sm">
               <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">{p.pronouns}</span>
+              <span className="text-slate-300">{p.pronouns}</span>
             </div>
           )}
           {p?.location && (
             <div className="flex items-center gap-3 text-sm">
               <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">Lives in {p.location}</span>
+              <span className="text-slate-300">Lives in {p.location}</span>
             </div>
           )}
           {p?.hometown && (
             <div className="flex items-center gap-3 text-sm">
               <Home className="h-4 w-4 text-gray-400 flex-shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">From {p.hometown}</span>
+              <span className="text-slate-300">From {p.hometown}</span>
             </div>
           )}
           {p?.birthday && (
             <div className="flex items-center gap-3 text-sm">
               <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">{p.birthday}</span>
+              <span className="text-slate-300">{p.birthday}</span>
             </div>
           )}
           {p?.created_at && (
             <div className="flex items-center gap-3 text-sm">
               <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-              <span className="text-gray-700 dark:text-gray-300">
+              <span className="text-slate-300">
                 Joined {new Date(p.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               </span>
             </div>
@@ -577,13 +578,13 @@ function AboutSection({ profile: p }: { profile: any }) {
       {/* Work */}
       {(p?.workplace || p?.job_title) && (
         <div className="glass-card rounded-xl p-4">
-          <h3 className="font-semibold text-base dark:text-white mb-3">Work</h3>
+          <h3 className="font-semibold text-base text-white mb-3">Work</h3>
           <div className="flex items-start gap-3">
             <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
               <Briefcase className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-medium dark:text-white">{p.job_title || "Employee"}</p>
+              <p className="text-sm font-medium text-white">{p.job_title || "Employee"}</p>
               <p className="text-sm text-muted-foreground">{p.workplace}</p>
             </div>
           </div>
@@ -593,7 +594,7 @@ function AboutSection({ profile: p }: { profile: any }) {
       {/* Education */}
       {(p?.school || p?.department) && (
         <div className="glass-card rounded-xl p-4">
-          <h3 className="font-semibold text-base dark:text-white mb-3">Education</h3>
+          <h3 className="font-semibold text-base text-white mb-3">Education</h3>
           <div className="space-y-3">
             {p?.school && (
               <div className="flex items-start gap-3">
@@ -601,7 +602,7 @@ function AboutSection({ profile: p }: { profile: any }) {
                   <School className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium dark:text-white">{p.school}</p>
+                  <p className="text-sm font-medium text-white">{p.school}</p>
                   {p.year && <p className="text-xs text-muted-foreground">{p.year}</p>}
                 </div>
               </div>
@@ -612,7 +613,7 @@ function AboutSection({ profile: p }: { profile: any }) {
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium dark:text-white">B.Sc. {p.department}</p>
+                  <p className="text-sm font-medium text-white">B.Sc. {p.department}</p>
                   {p.year && <p className="text-xs text-muted-foreground">International Christian University · {p.year}</p>}
                 </div>
               </div>
@@ -624,10 +625,10 @@ function AboutSection({ profile: p }: { profile: any }) {
       {/* Skills */}
       {(p?.skills || "").trim() !== "" && (
         <div className="glass-card rounded-xl p-4">
-          <h3 className="font-semibold text-base dark:text-white mb-3">Skills</h3>
+          <h3 className="font-semibold text-base text-white mb-3">Skills</h3>
           <div className="flex flex-wrap gap-2">
             {p.skills.split(",").map((s: string) => s.trim()).filter(Boolean).map((skill: string) => (
-              <Badge key={skill} className="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 border-purple-100 dark:border-purple-800">
+              <Badge key={skill} className="bg-purple-500/12 text-purple-300 bg-purple-500/15 text-purple-300 border-purple-500/25 dark:border-purple-800">
                 {skill}
               </Badge>
             ))}
@@ -638,12 +639,12 @@ function AboutSection({ profile: p }: { profile: any }) {
       {/* Contact Info */}
       {(p?.website || p?.instagram || p?.twitter || p?.email) && (
         <div className="glass-card rounded-xl p-4">
-          <h3 className="font-semibold text-base dark:text-white mb-3">Contact Info</h3>
+          <h3 className="font-semibold text-base text-white mb-3">Contact Info</h3>
           <div className="space-y-3">
             {p?.email && (
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-gray-400">@</span>
-                <span className="text-gray-700 dark:text-gray-300">{p.email}</span>
+                <span className="text-slate-300">{p.email}</span>
               </div>
             )}
             {p?.instagram && (
