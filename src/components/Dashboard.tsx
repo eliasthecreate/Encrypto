@@ -27,6 +27,7 @@ import { Friends } from "./Friends";
 import { Live } from "./Live";
 import { Profile } from "./Profile";
 import { NotificationsPanel } from "./NotificationsPanel";
+import type { ChatTarget } from "./Messages";
 import { toast } from "sonner";
 
 const tabs = [
@@ -42,6 +43,7 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState("feed");
   const [showSearch, setShowSearch] = useState(false);
   const [inChat, setInChat] = useState(false);
+  const [pendingChat, setPendingChat] = useState<ChatTarget | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { notifications } = useNotifications();
@@ -67,14 +69,26 @@ export function Dashboard() {
     setActiveTab("notifications");
   };
 
+  // "Message" on the Explore page jumps straight into that user's inbox.
+  const openChatWith = (user: ChatTarget) => {
+    setPendingChat(user);
+    setActiveTab("messages");
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "feed":
         return <Feed />;
       case "messages":
-        return <Messages onChatOpen={setInChat} />;
+        return (
+          <Messages
+            onChatOpen={setInChat}
+            openChatWith={pendingChat}
+            onOpenChatConsumed={() => setPendingChat(null)}
+          />
+        );
       case "friends":
-        return <Friends />;
+        return <Friends onMessage={openChatWith} />;
       case "live":
         return <Live />;
       case "notifications":

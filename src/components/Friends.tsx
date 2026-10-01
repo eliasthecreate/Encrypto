@@ -16,7 +16,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 
 import { VerifiedBadge } from "./VerifiedBadge";
 
-export function Friends() {
+export function Friends({
+  onMessage,
+}: {
+  onMessage?: (user: { id: string; name: string; avatar_url?: string | null; status?: string | null }) => void;
+} = {}) {
   const [activeTab, setActiveTab] = useState("suggestions");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -39,7 +43,7 @@ export function Friends() {
   );
 
   const renderStudentCard = (
-    student: { id: string; name: string; department?: string | null; year?: string | null; status: string; is_verified?: boolean; university_domain?: string | null },
+    student: { id: string; name: string; department?: string | null; year?: string | null; status: string; avatar_url?: string | null; is_verified?: boolean; university_domain?: string | null },
     showAddButton = false,
     showMessageButton = false
   ) => (
@@ -49,7 +53,7 @@ export function Friends() {
       animate={{ opacity: 1, y: 0 }}
       className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/[0.05] cursor-pointer transition-all border border-transparent hover:border-white/[0.07]"
     >
-      <Avatar name={student.name} size="lg" status={student.status as any} showStatus />
+      <Avatar name={student.name} src={student.avatar_url ?? undefined} size="lg" status={student.status as any} showStatus />
       <div className="flex-1 min-w-0">
         <div className="font-semibold text-sm text-white flex items-center gap-1.5">
           <span>{student.name}</span>
@@ -78,10 +82,20 @@ export function Friends() {
         )
       )}
       {showMessageButton && (
-        <span className="h-8 px-3.5 rounded-md border border-white/10 bg-white/5 text-slate-300 text-xs font-medium flex items-center gap-1">
+        <button
+          onClick={() =>
+            onMessage?.({
+              id: student.id,
+              name: student.name,
+              avatar_url: student.avatar_url ?? null,
+              status: student.status ?? null,
+            })
+          }
+          className="h-8 px-3.5 rounded-md border border-white/10 bg-white/5 text-slate-300 text-xs font-medium flex items-center gap-1 hover:text-purple-200 hover:border-purple-500/40 hover:bg-purple-500/12 transition-colors"
+        >
           <MessageCircle className="h-3.5 w-3.5" />
           Message
-        </span>
+        </button>
       )}
     </motion.div>
   );
@@ -122,7 +136,7 @@ export function Friends() {
           <div className="space-y-2">
             {requests.map((request) => (
               <div key={request.id} className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.04] border border-white/[0.07]">
-                <Avatar name={request.sender?.name ?? "Unknown"} size="md" status={request.sender?.status ?? "offline" as any} showStatus />
+                <Avatar name={request.sender?.name ?? "Unknown"} src={request.sender?.avatar_url ?? undefined} size="md" status={request.sender?.status ?? "offline" as any} showStatus />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm text-white">{request.sender?.name ?? "Unknown"}</div>
                   <div className="text-xs text-slate-400">{request.sender?.department ?? ""}</div>

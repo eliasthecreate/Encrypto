@@ -843,7 +843,7 @@ function MessageBubble({
         )}
         {renderContent()}
         <div className={cn("flex items-center gap-1 mt-1", isOwn ? "justify-end" : "justify-start")}>
-          <span className={`text-[10px] ${isOwn ? "text-white/70" : "text-gray-400 text-slate-500"}`}>
+          <span className={`text-[10px] ${isOwn ? "text-white/70" : "text-slate-500"}`}>
             {new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
           {isOwn && (
@@ -858,7 +858,22 @@ function MessageBubble({
 }
 
 // ─── MAIN MESSAGES COMPONENT ────────────────────────────────────
-export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void } = {}) {
+export interface ChatTarget {
+  id: string;
+  name: string;
+  avatar_url?: string | null;
+  status?: string | null;
+}
+
+export function Messages({
+  onChatOpen,
+  openChatWith,
+  onOpenChatConsumed,
+}: {
+  onChatOpen?: (open: boolean) => void;
+  openChatWith?: ChatTarget | null;
+  onOpenChatConsumed?: () => void;
+} = {}) {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [fallbackConv, setFallbackConv] = useState<any>(null);
   const [messageInput, setMessageInput] = useState("");
@@ -1116,7 +1131,7 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
     }
   };
 
-  const handleStartNewChat = async (friendId: string) => {
+  const handleStartNewChat = async (friendId: string, profileOverride?: ChatTarget) => {
     // Check if conversation already exists
     const existing = conversations.find((c) => c.otherUser.id === friendId);
     if (existing) {
@@ -1125,9 +1140,9 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
       setShowNewChat(false);
       return;
     }
-    
+
     // Find friend profile for fallback rendering
-    const friendProfile = friends.find((f) => f.id === friendId);
+    const friendProfile = friends.find((f) => f.id === friendId) ?? profileOverride;
     if (!friendProfile) {
       toast.error("Could not find friend profile");
       return;
@@ -1227,6 +1242,23 @@ export function Messages({ onChatOpen }: { onChatOpen?: (open: boolean) => void 
   };
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // Deep link from another tab (e.g. "Message" on the Explore page): open that
+  // user's inbox directly, reusing or creating the conversation as needed.
+  // Guarded by a ref so a double-invoked effect (StrictMode, fast taps) cannot
+  // create two conversations with the same person.
+  const openingChatFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!openChatWith?.id) {
+      openingChatFor.current = null;
+      return;
+    }
+    if (friendsLoading || convsLoading) return;
+    if (openingChatFor.current === openChatWith.id) return;
+    openingChatFor.current = openChatWith.id;
+    handleStartNewChat(openChatWith.id, openChatWith);
+    onOpenChatConsumed?.();
+  }, [openChatWith, friendsLoading, convsLoading]);
 
   // Close the chat settings (⋯) menu when clicking outside of it
   useEffect(() => {
