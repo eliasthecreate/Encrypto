@@ -27,6 +27,7 @@ import { Friends } from "./Friends";
 import { Live } from "./Live";
 import { Profile } from "./Profile";
 import { NotificationsPanel } from "./NotificationsPanel";
+import { UserProfileView } from "./UserProfileView";
 import type { ChatTarget } from "./Messages";
 import { toast } from "sonner";
 
@@ -44,6 +45,7 @@ export function Dashboard() {
   const [showSearch, setShowSearch] = useState(false);
   const [inChat, setInChat] = useState(false);
   const [pendingChat, setPendingChat] = useState<ChatTarget | null>(null);
+  const [viewingUser, setViewingUser] = useState<ChatTarget | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { notifications } = useNotifications();
@@ -75,26 +77,34 @@ export function Dashboard() {
     setActiveTab("messages");
   };
 
+  // Tapping any avatar/name opens that person's public profile.
+  const viewProfile = (user: ChatTarget) => {
+    if (!user?.id) return;
+    setViewingUser(user);
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "feed":
-        return <Feed />;
+        return <Feed onViewProfile={viewProfile} />;
       case "messages":
         return (
           <Messages
             onChatOpen={setInChat}
             openChatWith={pendingChat}
             onOpenChatConsumed={() => setPendingChat(null)}
+            onViewProfile={viewProfile}
           />
         );
       case "friends":
-        return <Friends onMessage={openChatWith} />;
+        return <Friends onMessage={openChatWith} onViewProfile={viewProfile} />;
       case "live":
-        return <Live />;
+        return <Live onViewProfile={viewProfile} />;
       case "notifications":
         return (
           <NotificationsPanel
             onOpenConnections={() => setActiveTab("friends")}
+            onViewProfile={viewProfile}
           />
         );
       case "profile":
@@ -257,6 +267,17 @@ export function Dashboard() {
             })}
           </div>
         </nav>
+      )}
+
+      {viewingUser && (
+        <UserProfileView
+          userId={viewingUser.id}
+          onBack={() => setViewingUser(null)}
+          onMessage={(u) => {
+            setViewingUser(null);
+            openChatWith({ ...u, avatar_url: viewingUser.avatar_url, status: viewingUser.status });
+          }}
+        />
       )}
     </div>
   );

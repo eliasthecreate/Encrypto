@@ -14,12 +14,12 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Avatar } from "./ui/avatar";
-import { Badge } from "./ui/badge";
 import { formatTimeAgo } from "@/lib/utils";
 
 interface UserProfileViewProps {
   userId: string;
   onBack: () => void;
+  onMessage?: (user: { id: string; name: string }) => void;
 }
 
 interface PostWithMeta {
@@ -33,7 +33,7 @@ interface PostWithMeta {
   comment_count: number;
 }
 
-export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
+export function UserProfileView({ userId, onBack, onMessage }: UserProfileViewProps) {
   const [profile, setProfile] = useState<any>(null);
   const [postCount, setPostCount] = useState<number | null>(null);
   const [friendCount, setFriendCount] = useState<number | null>(null);
@@ -53,6 +53,8 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
         .select("*", { count: "exact", head: true })
         .eq("user_id", userId);
 
+      // RLS on `friends` scopes rows to the signed-in user's own pairs, so this
+      // returns only the viewed user's connections.
       const { count: fCount } = await supabase
         .from("friends")
         .select("*", { count: "exact", head: true })
@@ -111,10 +113,10 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-white dark:bg-gray-950 overflow-y-auto"
+      className="fixed inset-0 z-[60] bg-[#0d0d1a] overflow-y-auto"
     >
       {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-white/[0.07]">
+      <div className="sticky top-0 z-10 bg-[#0d0d1a]/90 backdrop-blur-xl border-b border-white/[0.07]">
         <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 h-14">
           <button
             onClick={onBack}
@@ -139,7 +141,7 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
       ) : (
         <div className="max-w-2xl mx-auto pb-24">
           {/* Cover Photo */}
-          <div className="relative h-44 sm:h-52 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400">
+          <div className="relative h-44 sm:h-52 bg-gradient-to-r from-purple-700 via-violet-600 to-pink-600">
             {profile.cover_url && (
               <img
                 src={profile.cover_url}
@@ -169,12 +171,12 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
             {/* Stats */}
             <div className="flex gap-6 mt-3 py-3 border-t border-white/[0.07]">
               <div className="text-center">
-                <div className="font-bold text-lg">{postCount}</div>
-                <div className="text-xs text-muted-foreground">Posts</div>
+                <div className="font-bold text-lg text-white">{postCount}</div>
+                <div className="text-xs text-slate-500">Posts</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg">{friendCount}</div>
-                <div className="text-xs text-muted-foreground">Friends</div>
+                <div className="font-bold text-lg text-white">{friendCount}</div>
+                <div className="text-xs text-slate-500">Friends</div>
               </div>
             </div>
 
@@ -185,13 +187,24 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
               </p>
             ) : null}
 
+            {/* Message */}
+            {onMessage && (
+              <button
+                onClick={() => onMessage({ id: profile.id, name: profile.name })}
+                className="mt-4 w-full h-10 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-purple-900/40"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Message {profile.name?.split(" ")[0]}
+              </button>
+            )}
+
             {/* Detail cards */}
             <div className="grid grid-cols-2 gap-3 mt-5">
               {[
-                { icon: BookOpen, label: "Program", value: profile.department || "—", color: "from-purple-400 to-pink-500" },
-                { icon: GraduationCap, label: "Year of Study", value: profile.year || "—", color: "from-orange-400 to-amber-500" },
-                { icon: Calendar, label: "Joined", value: profile.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "—", color: "from-pink-400 to-orange-500" },
-                { icon: Users, label: "Member of", value: "Campus Community", color: "from-amber-400 to-yellow-500" },
+                { icon: BookOpen, label: "Program", value: profile.department || "—", color: "from-purple-500 to-pink-600" },
+                { icon: GraduationCap, label: "Year of Study", value: profile.year || "—", color: "from-orange-500 to-amber-500" },
+                { icon: Calendar, label: "Joined", value: profile.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "—", color: "from-pink-500 to-orange-600" },
+                { icon: Users, label: "Member of", value: "Campus Community", color: "from-amber-500 to-yellow-500" },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
@@ -204,8 +217,8 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
                     <item.icon className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs text-muted-foreground">{item.label}</div>
-                    <div className="text-sm font-medium truncate">{item.value}</div>
+                    <div className="text-xs text-slate-500">{item.label}</div>
+                    <div className="text-sm font-medium text-white truncate">{item.value}</div>
                   </div>
                 </motion.div>
               ))}
@@ -220,9 +233,12 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill: string) => (
-                    <Badge key={skill} className="bg-purple-500/12 text-purple-300 bg-purple-500/15 text-purple-300 border-purple-500/25 dark:border-purple-800">
+                    <span
+                      key={skill}
+                      className="text-xs font-medium px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/25"
+                    >
                       {skill}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -235,13 +251,13 @@ export function UserProfileView({ userId, onBack }: UserProfileViewProps) {
                 Posts
               </h3>
               {posts.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl bg-white/[0.03] bg-[#1e1e3a]/50 border border-white/[0.08]">
+                <div className="cc-card p-8 text-center">
                   <p className="text-sm text-muted-foreground">No posts yet</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {posts.map((post) => (
-                    <div key={post.id} className="p-4 rounded-2xl bg-white/[0.03] bg-[#1e1e3a]/50 border border-white/[0.08]">
+                    <div key={post.id} className="cc-card p-4">
                       <p className="text-sm leading-relaxed text-slate-200">{post.content}</p>
                       {post.image_url && (
                         <img src={post.image_url} alt="Post" className="mt-3 rounded-xl w-full object-cover max-h-80" />

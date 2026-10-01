@@ -70,8 +70,10 @@ function NotificationGlyph({ type }: { type: string }) {
 
 export function NotificationsPanel({
   onOpenConnections,
+  onViewProfile,
 }: {
   onOpenConnections: () => void;
+  onViewProfile?: (user: { id: string; name: string; avatar_url?: string | null; status?: string | null }) => void;
 }) {
   const { notifications, loading, markAsRead, markAllAsRead } = useNotifications();
   const { requests, acceptRequest, rejectRequest } = useFriendRequests("panel");
@@ -127,7 +129,19 @@ export function NotificationsPanel({
             Connect Requests
           </div>
           {requests.map((request) => (
-            <div key={request.id} className="cc-card cc-card-hover p-3 flex items-center gap-3">
+            <div
+              key={request.id}
+              onClick={() => {
+                if (!request.sender?.id || !onViewProfile) return;
+                onViewProfile({
+                  id: request.sender.id,
+                  name: request.sender?.name ?? "Unknown",
+                  avatar_url: request.sender?.avatar_url ?? null,
+                  status: request.sender?.status ?? null,
+                });
+              }}
+              className={`cc-card cc-card-hover p-3 flex items-center gap-3 ${onViewProfile ? "cursor-pointer" : ""}`}
+            >
               <Avatar
                 name={request.sender?.name ?? "Unknown"}
                 src={request.sender?.avatar_url}
@@ -148,14 +162,20 @@ export function NotificationsPanel({
               </div>
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <button
-                  onClick={() => acceptRequest(request.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    acceptRequest(request.id);
+                  }}
                   aria-label="Accept"
                   className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white hover:brightness-110 transition"
                 >
                   <Check className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => rejectRequest(request.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    rejectRequest(request.id);
+                  }}
                   aria-label="Decline"
                   className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-rose-300 hover:border-rose-500/40 transition"
                 >

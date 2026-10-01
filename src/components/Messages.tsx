@@ -869,10 +869,12 @@ export function Messages({
   onChatOpen,
   openChatWith,
   onOpenChatConsumed,
+  onViewProfile,
 }: {
   onChatOpen?: (open: boolean) => void;
   openChatWith?: ChatTarget | null;
   onOpenChatConsumed?: () => void;
+  onViewProfile?: (user: ChatTarget) => void;
 } = {}) {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [fallbackConv, setFallbackConv] = useState<any>(null);
@@ -2006,7 +2008,19 @@ export function Messages({
                       ? "bg-purple-500/20 bg-purple-500/20 ring-1 ring-purple-500/40 shadow-[0_0_18px_rgba(168,85,247,0.25)]"
                       : "hover:bg-white/[0.06]"
                   }`}>
-                  <div className="relative flex-shrink-0">
+                  <div
+                    onClick={(e) => {
+                      if (conv.isGroup || !onViewProfile) return;
+                      e.stopPropagation();
+                      onViewProfile({
+                        id: conv.otherUser.id,
+                        name: conv.otherUser.name,
+                        avatar_url: conv.otherUser.avatar_url,
+                        status: conv.otherUser.status,
+                      });
+                    }}
+                    className="relative flex-shrink-0"
+                  >
                     {isUnread && (
                       <span className="absolute inset-0 rounded-full bg-purple-500/40 blur-md animate-pulse" />
                     )}
@@ -2019,13 +2033,31 @@ export function Messages({
                           </span>
                         </div>
                       ) : (
-                        <Avatar name={conv.otherUser.name} size="lg" status={conv.otherUser.status as any} showStatus />
+                        <Avatar
+                          name={conv.otherUser.name}
+                          src={conv.otherUser.avatar_url ?? undefined}
+                          size="lg"
+                          status={conv.otherUser.status as any}
+                          showStatus
+                        />
                       )}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className={`text-sm truncate ${isUnread ? "font-bold text-purple-300" : "font-semibold text-white"}`}>
+                      <span
+                        onClick={(e) => {
+                          if (conv.isGroup || !onViewProfile) return;
+                          e.stopPropagation();
+                          onViewProfile({
+                            id: conv.otherUser.id,
+                            name: conv.otherUser.name,
+                            avatar_url: conv.otherUser.avatar_url,
+                            status: conv.otherUser.status,
+                          });
+                        }}
+                        className={`text-sm truncate ${isUnread ? "font-bold text-purple-300" : "font-semibold text-white"} ${conv.isGroup ? "" : "cursor-pointer hover:text-purple-300 transition-colors"}`}
+                      >
                         {conv.isGroup ? conv.otherUser.name : (nicknames[conv.otherUser.id] || conv.otherUser.name)}
                       </span>
                       <span className={`text-xs flex-shrink-0 ml-2 ${isUnread ? "font-semibold text-purple-500" : "text-muted-foreground"}`}>

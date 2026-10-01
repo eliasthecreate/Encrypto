@@ -18,8 +18,10 @@ import { VerifiedBadge } from "./VerifiedBadge";
 
 export function Friends({
   onMessage,
+  onViewProfile,
 }: {
   onMessage?: (user: { id: string; name: string; avatar_url?: string | null; status?: string | null }) => void;
+  onViewProfile?: (user: { id: string; name: string; avatar_url?: string | null; status?: string | null }) => void;
 } = {}) {
   const [activeTab, setActiveTab] = useState("suggestions");
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,6 +53,14 @@ export function Friends({
       key={student.id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      onClick={() =>
+        onViewProfile?.({
+          id: student.id,
+          name: student.name,
+          avatar_url: student.avatar_url ?? null,
+          status: student.status ?? null,
+        })
+      }
       className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/[0.05] cursor-pointer transition-all border border-transparent hover:border-white/[0.07]"
     >
       <Avatar name={student.name} src={student.avatar_url ?? undefined} size="lg" status={student.status as any} showStatus />
@@ -73,7 +83,10 @@ export function Friends({
           </span>
         ) : (
           <button
-            onClick={() => handleAddFriend(student.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddFriend(student.id);
+            }}
             className="cc-gradient-btn h-8 px-3.5 text-xs flex items-center gap-1"
           >
             <UserPlus className="h-3.5 w-3.5" />
@@ -83,14 +96,15 @@ export function Friends({
       )}
       {showMessageButton && (
         <button
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             onMessage?.({
               id: student.id,
               name: student.name,
               avatar_url: student.avatar_url ?? null,
               status: student.status ?? null,
-            })
-          }
+            });
+          }}
           className="h-8 px-3.5 rounded-md border border-white/10 bg-white/5 text-slate-300 text-xs font-medium flex items-center gap-1 hover:text-purple-200 hover:border-purple-500/40 hover:bg-purple-500/12 transition-colors"
         >
           <MessageCircle className="h-3.5 w-3.5" />

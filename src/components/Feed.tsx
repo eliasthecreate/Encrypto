@@ -26,7 +26,11 @@ import { useAuth } from "@/lib/auth-context";
 
 import { VerifiedBadge } from "./VerifiedBadge";
 
-export function Feed() {
+export function Feed({
+  onViewProfile,
+}: {
+  onViewProfile?: (user: { id: string; name: string; avatar_url?: string | null; status?: string | null }) => void;
+} = {}) {
   const [postContent, setPostContent] = useState("");
   const [postType, setPostType] = useState<"post" | "event" | "announcement">("post");
   const [postImage, setPostImage] = useState<File | null>(null);
@@ -352,22 +356,32 @@ export function Feed() {
             <div className="cc-card cc-card-hover overflow-hidden">
               <div className="p-4 pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Avatar
-                      name={post.profiles?.name ?? "Unknown"}
-                      src={post.profiles?.avatar_url ?? undefined}
-                      size="lg"
-                      status={post.profiles?.status ?? "offline"}
-                      showStatus
-                    />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white hover:text-purple-300 cursor-pointer transition-colors flex items-center gap-1.5 truncate">
-                          <span>{post.profiles?.name ?? "Unknown"}</span>
-                          {(post.profiles as any)?.is_verified && (
-                            <VerifiedBadge domain={(post.profiles as any)?.university_domain} size="sm" />
-                          )}
-                        </span>
+                  <button
+                      onClick={() =>
+                        onViewProfile?.({
+                          id: post.profiles?.id ?? post.user_id,
+                          name: post.profiles?.name ?? "Unknown",
+                          avatar_url: post.profiles?.avatar_url ?? null,
+                          status: post.profiles?.status ?? null,
+                        })
+                      }
+                      className="group flex items-center gap-3 min-w-0 text-left"
+                    >
+                      <Avatar
+                        name={post.profiles?.name ?? "Unknown"}
+                        src={post.profiles?.avatar_url ?? undefined}
+                        size="lg"
+                        status={post.profiles?.status ?? "offline"}
+                        showStatus
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm text-white group-hover:text-purple-300 transition-colors flex items-center gap-1.5 truncate">
+                            <span>{post.profiles?.name ?? "Unknown"}</span>
+                            {(post.profiles as any)?.is_verified && (
+                              <VerifiedBadge domain={(post.profiles as any)?.university_domain} size="sm" />
+                            )}
+                          </span>
                         {post.type !== "post" && (
                           <span
                             className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
@@ -388,8 +402,8 @@ export function Feed() {
                         <span>·</span>
                         <span className="flex-shrink-0">{formatTimeAgo(new Date(post.created_at))}</span>
                       </div>
-                    </div>
-                  </div>
+                      </div>
+                    </button>
                   <button
                     aria-label="Post options"
                     className="h-8 w-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0"

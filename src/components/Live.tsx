@@ -41,7 +41,11 @@ const categoryLabels: Record<string, string> = {
   other: "Other",
 };
 
-export function Live() {
+export function Live({
+  onViewProfile,
+}: {
+  onViewProfile?: (user: { id: string; name: string; avatar_url?: string | null; status?: string | null }) => void;
+} = {}) {
   const [showGoLive, setShowGoLive] = useState(false);
   const [streamTitle, setStreamTitle] = useState("");
   const [streamDesc, setStreamDesc] = useState("");
@@ -192,11 +196,37 @@ export function Live() {
                     </div>
                   </div>
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar name={stream.host?.name ?? "Unknown"} size="md" />
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        const hostId = stream.host?.id ?? stream.user_id;
+                        if (!hostId || !onViewProfile) return;
+                        onViewProfile({
+                          id: hostId,
+                          name: stream.host?.name ?? "Unknown",
+                          avatar_url: stream.host?.avatar_url ?? null,
+                          status: stream.host?.status ?? null,
+                        });
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        e.preventDefault();
+                        const hostId = stream.host?.id ?? stream.user_id;
+                        if (!hostId || !onViewProfile) return;
+                        onViewProfile({
+                          id: hostId,
+                          name: stream.host?.name ?? "Unknown",
+                          avatar_url: stream.host?.avatar_url ?? null,
+                          status: stream.host?.status ?? null,
+                        });
+                      }}
+                      className="group flex items-start gap-3 text-left w-full cursor-pointer"
+                    >
+                      <Avatar name={stream.host?.name ?? "Unknown"} src={stream.host?.avatar_url ?? undefined} size="md" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm text-white line-clamp-1">{stream.title}</h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs text-slate-400 mt-0.5 group-hover:text-purple-300 transition-colors">
                           {stream.host?.name ?? "Unknown"} · {stream.host?.department ?? ""}
                         </p>
                         <p className="text-xs text-slate-400 mt-1 line-clamp-2">{stream.description ?? ""}</p>
