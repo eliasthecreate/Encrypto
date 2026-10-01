@@ -1,186 +1,93 @@
-# CampusConnectICU Hybrid App Setup
-
-This guide shows how to run CampusConnectICU as both a web app and an Android app using a single React codebase.
+# CampusConnectICU — Running the App
 
 ## Architecture
 
-The app uses a hybrid architecture:
-- **React Web App**: Frontend built with React, Vite, and TailwindCSS
-- **Android App**: Native Android app that loads the React web app using WebView
-- **Shared Codebase**: The React app serves both the web and Android interfaces
+The Android app is a **thin WebView shell**. It contains no app logic of its
+own — `MainActivity.kt` loads the built React SPA out of the APK assets:
 
-## Running as Web App
-
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-
-### Steps
-
-1. **Navigate to the web directory:**
-```bash
-cd web
-```
-
-2. **Install dependencies:**
-```bash
-npm install
-```
-
-3. **Start the development server:**
-```bash
-npm run dev
-```
-
-4. **Open in browser:**
-- The app will be available at `http://localhost:5173`
-- Open this URL in your browser to use the web app
-
-## Running as Android App
-
-### Prerequisites
-- Android Studio
-- Android SDK (API 24+)
-- Node.js (v16 or higher)
-- npm or yarn
-
-### Steps
-
-1. **Start the React development server:**
-```bash
-cd web
-npm install
-npm run dev
-```
-
-2. **Open the project in Android Studio:**
-- Open Android Studio
-- Select "Open an Existing Project"
-- Navigate to `c:\Users\Elias\AndroidStudioProjects\CampusConnectICU`
-- Click "OK"
-
-3. **Configure the emulator or device:**
-- Create an Android emulator (API 24+) or connect a physical device
-- Enable developer mode on your device if using physical device
-
-4. **Run the app:**
-- In Android Studio, click the "Run" button (green triangle)
-- Select your emulator or device
-- The app will launch and load the React web app
-
-### Important Notes
-
-- The Android app loads the React app from `http://10.0.2.2:5173` (emulator's localhost)
-- The React dev server must be running before launching the Android app
-- The Vite server is configured to accept network connections (`host: '0.0.0.0'`)
-
-## Production Deployment
-
-### Web App
-
-1. **Build the React app:**
-```bash
-cd web
-npm run build
-```
-
-2. **Deploy the `dist` folder** to your web server (Netlify, Vercel, AWS, etc.)
-
-### Android App
-
-For production, you have two options:
-
-#### Option 1: Load from Hosted URL
-1. Build and deploy the React web app to a server
-2. Update `MainActivity.kt`:
-```kotlin
-webView.loadUrl("https://your-domain.com") // Your hosted URL
-```
-3. Build the Android APK in Android Studio
-
-#### Option 2: Bundle React App in Android
-1. Build the React app:
-```bash
-cd web
-npm run build
-```
-
-2. Copy the `dist` folder contents to Android assets:
-```bash
-mkdir -p app/src/main/assets/web
-cp -r web/dist/* app/src/main/assets/web/
-```
-
-3. Update `MainActivity.kt`:
 ```kotlin
 webView.loadUrl("file:///android_asset/web/index.html")
 ```
 
-4. Build the Android APK in Android Studio
-
-## Development Workflow
-
-### Web Development
-1. Make changes to React code in `web/src/`
-2. Changes hot-reload automatically in the browser
-3. Test at `http://localhost:5173`
-
-### Android Development
-1. Make changes to React code in `web/src/`
-2. Changes hot-reload automatically
-3. Test in Android app (reload the WebView if needed)
-4. For Android-specific changes, modify `app/src/main/`
-
-## Project Structure
+So there is one codebase (the SPA at the repo root) and two ways to run it.
 
 ```
 CampusConnectICU/
-├── web/                          # React web app
-│   ├── src/
-│   │   ├── pages/               # React pages (Login, Home, etc.)
-│   │   ├── App.jsx              # Main React app
-│   │   └── main.jsx             # Entry point
-│   ├── package.json             # React dependencies
-│   └── vite.config.js           # Vite configuration
-├── app/                          # Android app
-│   ├── src/main/
-│   │   ├── java/.../MainActivity.kt  # WebView integration
-│   │   └── AndroidManifest.xml       # App permissions
-│   └── build.gradle.kts         # Android dependencies
-└── HYBRID_SETUP.md              # This file
+├── src/                     # React 18 + TypeScript SPA (the actual app)
+├── dist/                    # build output — NOT committed, produced by npm run build
+├── app/                     # Android WebView wrapper
+│   └── src/main/
+│       ├── java/.../MainActivity.kt
+│       └── assets/web/      # committed copy of the built SPA, copied from dist/
+├── package.json
+└── build.gradle.kts / app/build.gradle.kts
 ```
 
-## Troubleshooting
+## Running the web app
 
-### Android app shows blank screen
-- Ensure the React dev server is running (`npm run dev`)
-- Check that the server is accessible at `http://10.0.2.2:5173`
-- Verify internet permission is in AndroidManifest.xml
+```bash
+npm install
+npm run dev      # http://localhost:5173, bound to 0.0.0.0
+npm run build    # -> dist/
+npm run preview
+```
 
-### React changes not reflecting in Android app
-- The WebView may need to be refreshed
-- Try clearing the app cache in Android settings
-- Ensure the dev server is running with `host: '0.0.0.0'`
+Deployed to https://campusconnect.freebuff.app.
 
-### Network errors in Android app
-- Check that your firewall allows connections to port 5173
-- Verify the emulator can access your machine's network
-- Try using your machine's IP address instead of `10.0.2.2`
+## Running on an Android emulator or device
 
-## Features
+**Order matters: build the SPA first, then run the app.** The `copyWebAssets`
+Gradle task copies `dist/` into `app/src/main/assets/web/` on every
+preBuild, so if `dist/` is missing the task is skipped and the app runs
+whatever committed bundle happens to be in `assets/web/` — which may be stale.
 
-Both the web and Android versions include:
-- User authentication (login/signup)
-- User profiles with editing
-- Search for friends
-- Real-time messaging
-- Posts and feed
-- Media sharing (photos, videos)
+```bash
+npm install
+npm run build
+```
 
-## Next Steps
+Then in Android Studio:
 
-- Set up backend API integration
-- Implement real-time messaging with WebSocket
-- Add push notifications for Android
-- Implement image upload and storage
-- Add offline support with service workers
+1. **Open the repository root** as the project (`File > Open`, pick the folder
+   containing `settings.gradle.kts`). Do not open `app/` on its own and do not
+   paste these files into a different project — the repo already *is* a valid
+   Android Studio project.
+2. Let Gradle sync. Android Studio supplies its own bundled JDK 21; if Gradle
+   ever tries to download a toolchain and fails, set
+   `JAVA_HOME` to `C:\Program Files\Android\Android Studio\jbr`.
+3. Select a device/emulator (API 24+) and press Run.
+
+First build takes a few minutes. `local.properties` (which holds `sdk.dir`) is
+gitignored, so a fresh clone will not have it — Android Studio normally
+regenerates it on open; if it complains, create it with
+`sdk.dir=C\:\\Users\\<you>\\AppData\\Local\\Android\\Sdk`.
+
+## Verifying a build from the command line
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+.\gradlew.bat :app:assembleDebug
+# -> app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Things that will bite you
+
+**The app ships unencrypted messages if crypto init fails.** `crypto.subtle`
+and IndexedDB both need to work in the WebView. The SPA treats any crypto
+error as "send plaintext" rather than surfacing it, so a failure is silent —
+messages will still appear to send and receive normally, just unencrypted.
+If you care about that, check the logcat output for
+`Failed to initialize user crypto` before trusting a test conversation.
+
+**The bundle is a snapshot.** Editing `src/` has no effect on the app until
+you re-run `npm run build` and rebuild the APK. `npm run dev` on its own does
+nothing for the Android app — there is no live-reload path into the WebView.
+
+**`google-services (1).json` is inert.** The filename is a browser download
+artifact and no Gradle plugin applies it, so Firebase is not wired into this
+build. The filename would also have to be exactly `google-services.json` for
+the plugin to pick it up.
+
+**Crypto is hourly-scoped.** Conversation keys rotate every hour and the hour
+is not stored with the message, so messages from a previous hour will not
+decrypt.

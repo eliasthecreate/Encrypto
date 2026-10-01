@@ -37,9 +37,16 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-tasks.register<Copy>("copyWebAssets") {
-    from(file("../web/dist"))
+// Bundles the built SPA into the APK assets that MainActivity loads via
+// file:///android_asset/web/index.html.
+// Sync (not Copy) so stale hashed bundles are removed instead of accumulating.
+// Skipped when dist/ is absent — a fresh clone still runs the committed assets
+// until `npm run build` has been run.
+tasks.register<Sync>("copyWebAssets") {
+    val webDist = file("../dist")
+    from(webDist)
     into(file("src/main/assets/web"))
+    onlyIf { webDist.exists() }
 }
 
 tasks.named("preBuild") {
