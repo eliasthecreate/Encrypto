@@ -678,7 +678,7 @@ function AboutSection({ profile: p }: { profile: any }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">B.Sc. {p.department}</p>
-                  {p.year && <p className="text-xs text-muted-foreground">International Christian University · {p.year}</p>}
+                  {p.year && <p className="text-xs text-muted-foreground">The Information and Communications University · {p.year}</p>}
                 </div>
               </div>
             )}

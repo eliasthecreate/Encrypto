@@ -32,7 +32,7 @@ export function LandingPage() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-purple-400/25 bg-purple-500/10 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-purple-200">
             <span className="live-dot h-1.5 w-1.5 rounded-full bg-pink-400" />
-            International Christian University
+            The Information and Communications University
           </span>
 
           <h1 className="mt-7 text-4xl sm:text-5xl font-extrabold leading-[1.08] tracking-tight text-white text-balance">
