@@ -441,5 +441,12 @@ CREATE POLICY "Users can create stories" ON stories FOR INSERT WITH CHECK (auth.
 DROP POLICY IF EXISTS "Users can delete own stories" ON stories;
 CREATE POLICY "Users can delete own stories" ON stories FOR DELETE USING (auth.uid() = user_id);
 
+-- ============================================================
+-- FOR YOU PERSONALIZATION (interests / courses picked in onboarding)
+-- ============================================================
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS interests TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS courses TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS interests_set BOOLEAN NOT NULL DEFAULT false;
+
 -- ✅ DONE! All tables, policies, and triggers are set up.
 -- Now sign up through the app and the profiles table will auto-create.

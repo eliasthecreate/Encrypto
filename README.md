@@ -1,9 +1,10 @@
 # Campus Connect ICU
 
-A Facebook-like campus social network for International Christian University students. Connect with classmates, share posts, chat in real-time, go live, and discover fellow students — all in one place.
+A Facebook-like campus social network for The Information and Communications University students. Connect with classmates, share posts, chat in real-time, go live, and discover fellow students — all in one place.
 
 ## ✨ Features
 
+- **✨ For You** — A personalized feed tuned to your interests, courses, and program. The first visit runs a quick animated interest picker (movies, anime, sports, fashion and more) and shows *why* each post was picked.
 - **📱 Campus Feed** — Share updates, events, and announcements with the ICU community. React, comment, and engage with posts.
 - **💬 Real-time Messaging** — Chat with friends with text, images, voice notes, and media. Read receipts, typing indicators, and online status.
 - **👥 Friends & Community** — Send friend requests, discover students from your department and year, and see mutual connections.
@@ -64,6 +65,9 @@ src/
 │   ├── AuthPage.tsx      # Login/Signup
 │   ├── Dashboard.tsx     # Main app shell + bottom nav
 │   ├── Feed.tsx          # Home feed with posts
+│   ├── ForYou.tsx        # Personalized interest-based feed
+│   ├── InterestsOnboarding.tsx  # First-visit interest picker
+│   ├── InterestPicker.tsx       # Reusable animated chip grid
 │   ├── Friends.tsx       # Friend requests + suggestions
 │   ├── LandingPage.tsx   # Public landing page
 │   ├── Live.tsx          # Live streaming

@@ -19,9 +19,11 @@ import {
   LogOut,
   GraduationCap,
   Settings as SettingsIcon,
+  Sparkles,
 } from "lucide-react";
 import { Avatar } from "./ui/avatar";
 import { Feed } from "./Feed";
+import { ForYou } from "./ForYou";
 import { Messages } from "./Messages";
 import { Friends } from "./Friends";
 import { Live } from "./Live";
@@ -34,6 +36,7 @@ import { toast } from "sonner";
 
 const tabs = [
   { id: "feed", label: "Home", icon: Home },
+  { id: "foryou", label: "For You", icon: Sparkles },
   { id: "friends", label: "Explore", icon: Compass },
   { id: "messages", label: "Messages", icon: MessageCircle },
   { id: "live", label: "Live", icon: Video },
@@ -88,6 +91,8 @@ export function Dashboard() {
     switch (activeTab) {
       case "feed":
         return <Feed onViewProfile={viewProfile} />;
+      case "foryou":
+        return <ForYou onViewProfile={viewProfile} />;
       case "messages":
         return (
           <Messages

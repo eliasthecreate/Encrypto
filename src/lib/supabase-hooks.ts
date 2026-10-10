@@ -11,6 +11,7 @@ import {
 } from "./crypto";
 import { toast } from "sonner";
 import type { Profile, Post, Message, FriendRequest, LiveStream, Notification, Conversation } from "./supabase-types";
+import { interestById, courseById, splitList, countMatches, textMatchesTerm } from "./interests";
 
 // ─── FEED HOOKS ─────────────────────────────────────────────────
 
@@ -897,7 +898,198 @@ export function scoreSimilarity(me: any, other: any): SuggestionMatch {
       reasons.push(`Shares ${shared.slice(0, 3).join(", ")}`);
    }
 
+   // Shared For You interests
+   const myInterests = splitList(me?.interests);
+   const theirInterests = splitList(other?.interests);
+   const sharedInterests = myInterests.filter((i) => theirInterests.includes(i));
+   if (sharedInterests.length > 0) {
+      score += Math.min(30, sharedInterests.length * 12);
+      const labels = sharedInterests.map((i) => interestById(i)?.label ?? i).slice(0, 3).join(", ");
+      reasons.push(`Also into ${labels}`);
+   }
+
+   // Shared courses
+   const theirCourses = splitList(other?.courses);
+   const sharedCourses = splitList(me?.courses).filter((c) => theirCourses.includes(c));
+   if (sharedCourses.length > 0) {
+      score += Math.min(20, sharedCourses.length * 10);
+      const labels = sharedCourses.map((c) => courseById(c)?.label ?? c).slice(0, 2).join(", ");
+      reasons.push(`Takes ${labels}`);
+   }
+
    return { profile: other, score, reasons };
+}
+
+// ─── FOR YOU HOOKS ──────────────────────────────────────────────
+
+export interface ForYouPost extends PostWithDetails {
+   match_score: number;
+   match_reasons: string[];
+}
+
+/**
+ * Relevance score for ranking a post on the For You feed. Rewards posts whose
+ * text matches the viewer's interests, courses or program, then nudges by
+ * engagement and freshness so the feed still feels alive.
+ */
+export function scorePostForUser(
+   post: any,
+   me: any,
+   interestIds: string[],
+   courseIds: string[]
+): { score: number; reasons: string[] } {
+   const reasons: string[] = [];
+   let score = 0;
+
+   const text = `${post?.content ?? ""} ${post?.event_location ?? ""}`.toLowerCase();
+   const author = post?.profiles ?? {};
+
+   // Interests the viewer picked during onboarding
+   for (const id of interestIds) {
+      const def = interestById(id);
+      if (!def) continue;
+      const hits = countMatches(text, def.keywords);
+      if (hits > 0) {
+         score += 14 + hits * 5;
+         reasons.push(def.label);
+      }
+   }
+
+   // Courses the viewer follows
+   for (const id of courseIds) {
+      const def = courseById(id);
+      if (!def) continue;
+      if (countMatches(text, def.keywords) > 0) {
+         score += 12;
+         reasons.push(def.label);
+      }
+   }
+
+   // Program / department mentioned, or authored by a classmate
+   const dept = (me?.department ?? "").toLowerCase();
+   if (dept && textMatchesTerm(text, dept)) {
+      score += 16;
+      reasons.push(me.department);
+   }
+   if (me?.department && author?.department && me.department === author.department) {
+      score += 12;
+      reasons.push("Same program");
+   }
+   if (me?.year && author?.year && me.year === author.year) {
+      score += 6;
+      reasons.push("Same year");
+   }
+
+   // Engagement
+   score += Math.min(12, (post?.like_count ?? 0) * 0.6 + (post?.comment_count ?? 0) * 1.5);
+
+   // Recency — fresh posts float up
+   if (post?.created_at) {
+      const ageDays = (Date.now() - new Date(post.created_at).getTime()) / 86400000;
+      score += Math.max(0, 24 - ageDays * 2);
+   }
+
+   return { score, reasons: Array.from(new Set(reasons)).slice(0, 3) };
+}
+
+export function useForYouFeed(interestIds: string[], courseIds: string[]) {
+   const [posts, setPosts] = useState<ForYouPost[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [refreshCounter, setRefreshCounter] = useState(0);
+   const { user } = useAuth();
+   const userId = user?.id;
+
+   // Stable dependency keys so the feed only refetches when the picked
+   // interests/courses actually change (not on every render).
+   const interestsKey = interestIds.join(",");
+   const coursesKey = courseIds.join(",");
+
+   const fetchFeed = useCallback(async () => {
+      if (!userId) return;
+      setLoading(true);
+      try {
+         const { data: me } = await (supabase.from("profiles") as any)
+            .select("*")
+            .eq("id", userId)
+            .maybeSingle();
+
+         const { data: rawData, error } = await supabase
+            .from("posts")
+            .select(`*, profiles!inner(id, name, department, year, status, avatar_url)`)
+            .order("created_at", { ascending: false })
+            .limit(120);
+
+         if (error) throw error;
+         const data: any[] = rawData ?? [];
+         const ids = data.map((p) => p.id);
+
+         // Batch like/comment counts + my likes (avoids an N+1 query per post)
+         const likeCounts: Record<string, number> = {};
+         const commentCounts: Record<string, number> = {};
+         const likedByMe = new Set<string>();
+         if (ids.length) {
+            const { data: likes } = await supabase
+               .from("post_likes")
+               .select("post_id, user_id")
+               .in("post_id", ids);
+            for (const l of ((likes ?? []) as any[])) {
+               likeCounts[l.post_id] = (likeCounts[l.post_id] ?? 0) + 1;
+               if (l.user_id === userId) likedByMe.add(l.post_id);
+            }
+            const { data: comments } = await supabase
+               .from("comments")
+               .select("post_id")
+               .in("post_id", ids);
+            for (const c of ((comments ?? []) as any[])) {
+               commentCounts[c.post_id] = (commentCounts[c.post_id] ?? 0) + 1;
+            }
+         }
+
+         const ranked = data
+            .map((post) => {
+               const enriched = {
+                  ...post,
+                  like_count: likeCounts[post.id] ?? 0,
+                  comment_count: commentCounts[post.id] ?? 0,
+                  is_liked_by_me: likedByMe.has(post.id),
+               };
+               const { score, reasons } = scorePostForUser(enriched, me, interestIds, courseIds);
+               return { ...enriched, match_score: score, match_reasons: reasons } as ForYouPost;
+            })
+            .sort((a, b) => {
+               if (b.match_score !== a.match_score) return b.match_score - a.match_score;
+               return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            });
+
+         setPosts(ranked);
+      } catch (err) {
+         console.error("Failed to fetch For You feed:", err);
+      } finally {
+         setLoading(false);
+      }
+   }, [userId, interestsKey, coursesKey]);
+
+   useEffect(() => {
+      fetchFeed();
+   }, [fetchFeed, refreshCounter]);
+
+   const likePost = async (postId: string) => {
+      if (!userId) return;
+      const existing = await supabase
+         .from("post_likes")
+         .select("id")
+         .eq("post_id", postId)
+         .eq("user_id", userId)
+         .maybeSingle();
+      if ((existing.data as any)) {
+         await supabase.from("post_likes").delete().eq("id", (existing.data as any).id);
+      } else {
+         await supabase.from("post_likes").insert({ post_id: postId, user_id: userId } as any);
+      }
+      fetchFeed();
+   };
+
+   return { posts, loading, likePost, refresh: () => setRefreshCounter((c) => c + 1) };
 }
 
 export function useStudentSuggestions() {

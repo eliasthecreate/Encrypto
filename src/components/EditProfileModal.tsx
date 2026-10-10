@@ -19,6 +19,8 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { InterestPicker } from "./InterestPicker";
+import { INTERESTS, COURSES, splitList, joinList, toggleInList } from "@/lib/interests";
 import { toast } from "sonner";
 
 interface EditProfileModalProps {
@@ -44,6 +46,8 @@ export function EditProfileModal({ open, onClose, profile, onSave }: EditProfile
   const [website, setWebsite] = useState("");
   const [instagram, setInstagram] = useState("");
   const [twitter, setTwitter] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [courses, setCourses] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -63,6 +67,8 @@ export function EditProfileModal({ open, onClose, profile, onSave }: EditProfile
       setWebsite(profile.website ?? "");
       setInstagram(profile.instagram ?? "");
       setTwitter(profile.twitter ?? "");
+      setInterests(splitList(profile.interests));
+      setCourses(splitList(profile.courses));
     }
   }, [profile]);
 
@@ -88,6 +94,8 @@ export function EditProfileModal({ open, onClose, profile, onSave }: EditProfile
       website,
       instagram,
       twitter,
+      interests: joinList(interests),
+      courses: joinList(courses),
     });
     setSaving(false);
     toast.success("Profile updated!");
@@ -240,6 +248,29 @@ export function EditProfileModal({ open, onClose, profile, onSave }: EditProfile
                     <Input value={school} onChange={(e) => setSchool(e.target.value)} className="pl-10" placeholder="Information and Communication University" />
                   </div>
                 </div>
+              </div>
+
+              {/* For You personalization */}
+              <div className="border-t border-white/[0.07] pt-4">
+                <h3 className="text-sm font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-fuchsia-400" />
+                  For You Interests
+                </h3>
+                <p className="text-[11px] text-muted-foreground mb-3">
+                  These tune what you see on the For You tab.
+                </p>
+                <InterestPicker
+                  items={INTERESTS}
+                  selected={interests}
+                  onToggle={(id) => setInterests((prev) => toggleInList(prev, id))}
+                />
+                <h3 className="text-xs font-semibold text-slate-400 mt-4 mb-2">Courses</h3>
+                <InterestPicker
+                  items={COURSES}
+                  selected={courses}
+                  onToggle={(id) => setCourses((prev) => toggleInList(prev, id))}
+                  startDelay={0.05}
+                />
               </div>
 
               {/* Contact / Social Links */}

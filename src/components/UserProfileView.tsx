@@ -15,6 +15,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { Avatar } from "./ui/avatar";
 import { formatTimeAgo } from "@/lib/utils";
+import { interestById, splitList } from "@/lib/interests";
 
 interface UserProfileViewProps {
   userId: string;
@@ -107,6 +108,8 @@ export function UserProfileView({ userId, onBack, onMessage }: UserProfileViewPr
     .split(",")
     .map((s: string) => s.trim())
     .filter(Boolean);
+
+  const interests = splitList(profile?.interests);
 
   return (
     <motion.div
@@ -240,6 +243,29 @@ export function UserProfileView({ userId, onBack, onMessage }: UserProfileViewPr
                       {skill}
                     </span>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Interests */}
+            {interests.length > 0 && (
+              <div className="mt-6">
+                <h3 className="flex items-center gap-1.5 font-semibold text-sm text-white mb-2">
+                  <Sparkles className="h-4 w-4 text-fuchsia-400" />
+                  Interests
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((id: string) => {
+                    const def = interestById(id);
+                    return (
+                      <span
+                        key={id}
+                        className="text-xs font-medium px-2.5 py-1 rounded-full bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/25"
+                      >
+                        {def ? `${def.emoji} ${def.label}` : id}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}

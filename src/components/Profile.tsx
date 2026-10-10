@@ -25,8 +25,10 @@ import {
   LayoutGrid,
   ChevronDown,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { useProfile, useProfileStats, useUserPosts, useFriends } from "@/lib/supabase-hooks";
+import { interestById, courseById, splitList } from "@/lib/interests";
 import { useAuth } from "@/lib/auth-context";
 import { uploadFile } from "@/lib/supabase";
 import { Avatar } from "./ui/avatar";
@@ -697,6 +699,47 @@ function AboutSection({ profile: p }: { profile: any }) {
               </Badge>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Interests (For You) */}
+      {splitList(p?.interests).length > 0 && (
+        <div className="glass-card rounded-xl p-4">
+          <h3 className="font-semibold text-base text-white mb-3 flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-fuchsia-400" />
+            Interests
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {splitList(p.interests).map((id: string) => {
+              const def = interestById(id);
+              return (
+                <span
+                  key={id}
+                  className="text-xs font-medium px-2.5 py-1 rounded-full bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/25"
+                >
+                  {def ? `${def.emoji} ${def.label}` : id}
+                </span>
+              );
+            })}
+          </div>
+          {splitList(p?.courses).length > 0 && (
+            <>
+              <h3 className="font-semibold text-sm text-white mt-4 mb-2">Courses</h3>
+              <div className="flex flex-wrap gap-2">
+                {splitList(p.courses).map((id: string) => {
+                  const def = courseById(id);
+                  return (
+                    <span
+                      key={id}
+                      className="text-xs font-medium px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/25"
+                    >
+                      {def ? `${def.emoji} ${def.label}` : id}
+                    </span>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       )}
 

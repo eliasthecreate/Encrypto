@@ -90,6 +90,12 @@ export interface Profile {
   website: string | null;
   instagram: string | null;
   twitter: string | null;
+  /** Comma-separated interest ids for the For You feed (e.g. "movies,anime"). */
+  interests: string | null;
+  /** Comma-separated course ids for the For You feed. */
+  courses: string | null;
+  /** True once the user has seen/completed (or skipped) For You onboarding. */
+  interests_set: boolean;
   status: "online" | "offline" | "away" | "busy";
   is_verified?: boolean;
   verification_type?: string | null;
